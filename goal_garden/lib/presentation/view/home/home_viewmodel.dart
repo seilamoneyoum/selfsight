@@ -1,5 +1,5 @@
-import 'package:goal_garden/presentation/app/app.locator.dart';
 import 'package:goal_garden/presentation/app/app.router.dart';
+import 'package:goal_garden/presentation/app/app_setup.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 

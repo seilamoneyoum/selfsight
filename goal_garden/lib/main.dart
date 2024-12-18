@@ -1,24 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:goal_garden/presentation/view/home/home_view.dart';
+import 'package:goal_garden/presentation/app/app.router.dart';
+import 'package:stacked_services/stacked_services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:goal_garden/presentation/app/app_setup.dart';
 
-void main() {
-  runApp(const MyApp());
+Future<void> main() async {
+  // Ensure initialization before the app starts
+  //await dotenv.load(fileName: ".env");
+  WidgetsFlutterBinding.ensureInitialized();
+  await AppSetup.setupLocator();
+
+  runApp(const MainApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MainApp extends StatelessWidget {
+  const MainApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color.fromARGB(255, 35, 9, 80)),
-        useMaterial3: true,
-      ),
-      home: const HomeView(),
+      initialRoute: Routes.homeView,
+      onGenerateRoute: StackedRouter().onGenerateRoute,
+      navigatorKey: StackedService.navigatorKey,
     );
   }
 }
