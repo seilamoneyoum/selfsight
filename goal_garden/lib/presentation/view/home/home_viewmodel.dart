@@ -5,9 +5,11 @@ import 'package:stacked_services/stacked_services.dart';
 
 class HomeViewModel extends BaseViewModel {
   final _navigationService = locator<NavigationService>();
+  int nbMainGoal = 0;
 
   void addMainGoal() {
-    _navigationService.navigateTo(Routes.mainGoalView);
+    nbMainGoal++;
+    //_navigationService.navigateTo(Routes.mainGoalView);
   }
 
   void navigateToMainGoalView() {
