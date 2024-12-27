@@ -1,4 +1,4 @@
-enum Priority { none, low, medium, high }
+import 'priority.dart';
 
 class Progress {
   final bool isAccomplished;
