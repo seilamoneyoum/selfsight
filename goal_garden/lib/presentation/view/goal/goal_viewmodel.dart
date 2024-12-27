@@ -3,13 +3,13 @@ import 'package:goal_garden/presentation/app/app_setup.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 
-class MainGoalViewModel extends BaseViewModel {
+class GoalViewModel extends BaseViewModel {
   final _navigationService = locator<NavigationService>();
   int nbMainGoal = 1;
 
   void addMainGoal() {
     nbMainGoal++;
-    //_navigationService.navigateTo(Routes.mainGoalView);
+    //_navigationService.navigateTo(Routes.GoalView);
   }
 
   void navigateToHomeGoalView() {

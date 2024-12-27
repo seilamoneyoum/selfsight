@@ -7,20 +7,19 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:flutter/material.dart' as _i4;
 import 'package:flutter/material.dart';
+import 'package:goal_garden/presentation/view/goal/goal_view.dart' as _i3;
 import 'package:goal_garden/presentation/view/home/home_view.dart' as _i2;
-import 'package:goal_garden/presentation/view/main_goal/main_goal_view.dart'
-    as _i3;
 import 'package:stacked/stacked.dart' as _i1;
 import 'package:stacked_services/stacked_services.dart' as _i5;
 
 class Routes {
   static const homeView = '/';
 
-  static const mainGoalView = '/main-goal-view';
+  static const goalView = '/goal-view';
 
   static const all = <String>{
     homeView,
-    mainGoalView,
+    goalView,
   };
 }
 
@@ -31,8 +30,8 @@ class StackedRouter extends _i1.RouterBase {
       page: _i2.HomeView,
     ),
     _i1.RouteDef(
-      Routes.mainGoalView,
-      page: _i3.MainGoalView,
+      Routes.goalView,
+      page: _i3.GoalView,
     ),
   ];
 
@@ -43,9 +42,9 @@ class StackedRouter extends _i1.RouterBase {
         settings: data,
       );
     },
-    _i3.MainGoalView: (data) {
+    _i3.GoalView: (data) {
       return _i4.MaterialPageRoute<dynamic>(
-        builder: (context) => const _i3.MainGoalView(),
+        builder: (context) => const _i3.GoalView(),
         settings: data,
       );
     },
@@ -73,14 +72,14 @@ extension NavigatorStateExtension on _i5.NavigationService {
         transition: transition);
   }
 
-  Future<dynamic> navigateToMainGoalView([
+  Future<dynamic> navigateToGoalView([
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
     Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)?
         transition,
   ]) async {
-    return navigateTo<dynamic>(Routes.mainGoalView,
+    return navigateTo<dynamic>(Routes.goalView,
         id: routerId,
         preventDuplicates: preventDuplicates,
         parameters: parameters,
@@ -101,14 +100,14 @@ extension NavigatorStateExtension on _i5.NavigationService {
         transition: transition);
   }
 
-  Future<dynamic> replaceWithMainGoalView([
+  Future<dynamic> replaceWithGoalView([
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
     Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)?
         transition,
   ]) async {
-    return replaceWith<dynamic>(Routes.mainGoalView,
+    return replaceWith<dynamic>(Routes.goalView,
         id: routerId,
         preventDuplicates: preventDuplicates,
         parameters: parameters,

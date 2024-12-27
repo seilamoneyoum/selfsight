@@ -29,8 +29,8 @@ dependencies:
   badges: ^3.1.2
   jwt_decoder: ^2.0.1
   easy_localization: ^3.0.3
-
-
+  toggle_switch: ^2.3.0
+  getwidget: ^5.0.0
 
 dev_dependencies:
   flutter_test:
