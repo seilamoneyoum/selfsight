@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:selfsight/domain/entities/goal/category.dart';
 import 'package:selfsight/domain/entities/goal/priority.dart';
+import 'package:selfsight/presentation/view/goal/form/confirm_button.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:selfsight/presentation/view/goal/form/input_decoration.dart';
+import 'package:selfsight/presentation/view/goal/form/title_field.dart';
+import 'package:image_collage_widget/image_collage_widget.dart';
+import 'package:image_collage_widget/utils/collage_type.dart';
 
 // Create a Form widget.
 class GoalForm extends StatefulWidget {
@@ -34,6 +39,8 @@ class GoalFormState extends State<GoalForm> {
         children: [
           titleField(),
           SizedBox(height: 16), //ou Spacer()
+          //visionBoardButton(),
+          SizedBox(height: 8),
           categoryDropdown(),
           SizedBox(height: 8),
           dateField("Start date", true),
@@ -44,26 +51,40 @@ class GoalFormState extends State<GoalForm> {
           SizedBox(height: 8),
           priorityDropdown(),
           SizedBox(height: 32),
-          confirmButton()
+          confirmButton(_formKey, context)
         ],
       ),
     );
   }
 
-  ElevatedButton confirmButton() {
-    return ElevatedButton(
-        onPressed: () {
-          // Validate returns true if the form is valid, or false otherwise.
-          if (_formKey.currentState!.validate()) {
-            // If the form is valid, display a snackbar. In the real world,
-            // you'd often call a server or save the information in a database.
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Processing Data')),
-            );
-          }
-        },
-        child: Text("Confirm",
-            style: GoogleFonts.poppins(fontSize: 13, color: Colors.black)));
+  DropdownButtonFormField<Category> categoryDropdown() {
+    return DropdownButtonFormField<Category>(
+      decoration: inputDecoration("Category"),
+      initialValue: selectedCategory,
+      isExpanded: true,
+      items: Category.values.map((Category category) {
+        return DropdownMenuItem<Category>(
+          value: category,
+          child: Row(
+            children: [
+              Icon(category.icon),
+              SizedBox(width: 8),
+              Text(
+                category.title,
+                style: TextStyle(
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+      onChanged: (Category? newValue) {
+        setState(() {
+          selectedCategory = newValue;
+        });
+      },
+    );
   }
 
   Row isAccomplishedCheckbox() {
@@ -187,7 +208,7 @@ class GoalFormState extends State<GoalForm> {
 
   DropdownButtonFormField<Priority> priorityDropdown() {
     return DropdownButtonFormField<Priority>(
-      decoration: formInputDecoration("Priority"),
+      decoration: inputDecoration("Priority"),
       initialValue: selectedPriority,
       isExpanded: true,
       items: Priority.values.map((Priority priority) {
@@ -214,51 +235,4 @@ class GoalFormState extends State<GoalForm> {
       },
     );
   }
-
-  DropdownButtonFormField<Category> categoryDropdown() {
-    return DropdownButtonFormField<Category>(
-      decoration: formInputDecoration("Category"),
-      initialValue: selectedCategory,
-      isExpanded: true,
-      items: Category.values.map((Category category) {
-        return DropdownMenuItem<Category>(
-          value: category,
-          child: Row(
-            children: [
-              Icon(category.icon),
-              SizedBox(width: 8),
-              Text(
-                category.title,
-                style: TextStyle(
-                  fontSize: 13,
-                ),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
-      onChanged: (Category? newValue) {
-        setState(() {
-          selectedCategory = newValue;
-        });
-      },
-    );
-  }
-}
-
-InputDecoration formInputDecoration(String label) {
-  return InputDecoration(
-      labelText: label,
-      border: OutlineInputBorder(),
-      labelStyle: GoogleFonts.poppins(
-        fontSize: 13,
-        color: Colors.black,
-      ));
-}
-
-TextFormField titleField() {
-  return TextFormField(
-    decoration: formInputDecoration("Title"),
-    style: GoogleFonts.poppins(fontSize: 12),
-  );
 }
