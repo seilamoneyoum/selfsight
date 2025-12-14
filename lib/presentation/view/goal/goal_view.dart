@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:image_collage_widget/utils/collage_type.dart';
 import 'package:selfsight/presentation/view/goal/goal_viewmodel.dart';
 import 'package:selfsight/presentation/view/goal/goal_form.dart';
+import 'package:selfsight/presentation/view/goal/vision_board.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stacked/stacked.dart';
 
@@ -21,15 +23,27 @@ class _GoalViewState extends State<GoalView> {
           title: Text(
             "New goal",
             style: GoogleFonts.poppins(
-              fontSize: 24, // Change the font size
-              fontWeight: FontWeight.bold, // Change the font weight
-              color: Colors.black, // Change the text color
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
             ),
           ),
         ),
-        body: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 50, 20, 50),
-          child: const GoalForm(),
+        body: Container(
+          margin: EdgeInsets.all(16.0), // Space around all edges
+          child: Column(
+            children: [
+              Expanded(
+                flex: 3, // 30%
+                child: VisionBoard(),
+              ),
+              SizedBox(height: 20.0), // Space BETWEEN the widgets
+              Expanded(
+                flex: 7, // 70%
+                child: GoalForm(),
+              ),
+            ],
+          ),
         ),
       ),
     );

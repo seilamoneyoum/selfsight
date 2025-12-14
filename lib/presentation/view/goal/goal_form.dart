@@ -3,11 +3,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:selfsight/domain/entities/goal/category.dart';
 import 'package:selfsight/domain/entities/goal/priority.dart';
 import 'package:selfsight/presentation/view/goal/form/confirm_button.dart';
+import 'package:selfsight/presentation/view/goal/form/text.dart';
+import 'package:selfsight/presentation/view/goal/form/build_dropdown_items.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:selfsight/presentation/view/goal/form/input_decoration.dart';
 import 'package:selfsight/presentation/view/goal/form/title_field.dart';
-import 'package:image_collage_widget/image_collage_widget.dart';
-import 'package:image_collage_widget/utils/collage_type.dart';
 
 // Create a Form widget.
 class GoalForm extends StatefulWidget {
@@ -38,19 +38,17 @@ class GoalFormState extends State<GoalForm> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           titleField(),
-          SizedBox(height: 16), //ou Spacer()
-          //visionBoardButton(),
-          SizedBox(height: 8),
+          SizedBox(height: 12),
           categoryDropdown(),
-          SizedBox(height: 8),
+          SizedBox(height: 12),
           dateField("Start date", true),
-          SizedBox(height: 8),
+          SizedBox(height: 12),
           dateField("End date", false),
-          SizedBox(height: 8),
+          SizedBox(height: 12),
           isAccomplishedCheckbox(),
-          SizedBox(height: 8),
+          SizedBox(height: 12),
           priorityDropdown(),
-          SizedBox(height: 32),
+          SizedBox(height: 30),
           confirmButton(_formKey, context)
         ],
       ),
@@ -62,23 +60,11 @@ class GoalFormState extends State<GoalForm> {
       decoration: inputDecoration("Category"),
       initialValue: selectedCategory,
       isExpanded: true,
-      items: Category.values.map((Category category) {
-        return DropdownMenuItem<Category>(
-          value: category,
-          child: Row(
-            children: [
-              Icon(category.icon),
-              SizedBox(width: 8),
-              Text(
-                category.title,
-                style: TextStyle(
-                  fontSize: 13,
-                ),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
+      items: buildDropdownItems<Category>(
+        values: Category.values,
+        getIcon: (c) => c.icon,
+        getLabel: (c) => c.title,
+      ),
       onChanged: (Category? newValue) {
         setState(() {
           selectedCategory = newValue;
@@ -90,13 +76,7 @@ class GoalFormState extends State<GoalForm> {
   Row isAccomplishedCheckbox() {
     return Row(
       children: [
-        Text(
-          "Is accomplished",
-          style: GoogleFonts.poppins(
-            fontSize: 13,
-            color: Colors.black,
-          ),
-        ),
+        text("Is accomplished?"),
         Checkbox(
             checkColor: Colors.white,
             value: isAccomplished,
@@ -115,93 +95,96 @@ class GoalFormState extends State<GoalForm> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(
-              width: 90,
-              child: Text(
-                label,
-                style: GoogleFonts.poppins(
-                  fontSize: 13,
-                  color: Colors.black,
-                ),
-              ),
-            ),
+            SizedBox(width: 90, child: text(label)),
             SizedBox(
               width: 60,
-              child: CupertinoSwitch(
-                value: isStartDateBtn ? isStartDateToggleOn : isEndDateToggleOn,
-                activeTrackColor: Colors.black, // track color when enabled
-                onChanged: (val) {
-                  setState(() {
-                    if (isStartDateBtn) {
-                      isStartDateToggleOn = val;
-                    } else {
-                      isEndDateToggleOn = val;
-                    }
-                  });
-                },
-              ),
+              child: Transform.scale(
+                  scale: 0.8,
+                  child: CupertinoSwitch(
+                    value: isStartDateBtn
+                        ? isStartDateToggleOn
+                        : isEndDateToggleOn,
+                    activeTrackColor: Colors.black, // track color when enabled
+                    onChanged: (val) {
+                      setState(() {
+                        if (isStartDateBtn) {
+                          isStartDateToggleOn = val;
+                        } else {
+                          isEndDateToggleOn = val;
+                        }
+                      });
+                    },
+                  )),
             ),
             if (isStartDateBtn ? isStartDateToggleOn : isEndDateToggleOn)
-              ElevatedButton(
-                onPressed: isStartDateBtn
-                    ? (isStartDateToggleOn
-                        ? () => selectDate(context, true)
-                        : null)
-                    : (isEndDateToggleOn
-                        ? () => selectDate(context, false)
-                        : null),
-                child: Text(
-                  isStartDateBtn
-                      ? (selectedStartDate != null
-                          ? selectedStartDate.toString().substring(0, 10)
-                          : DateTime.now().toString().substring(0, 10))
-                      : (selectedEndDate != null
-                          ? selectedEndDate.toString().substring(0, 10)
-                          : DateTime.now().toString().substring(0, 10)),
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
+              toggleDateButton(isStartDateBtn)
           ],
         ));
   }
 
-  Future<void> selectDate(BuildContext context, bool isStartDateBtn) async {
-    final DateTime? picked = await showDatePicker(
+  Widget toggleDateButton(bool isStartDateBtn) {
+    return ElevatedButton(
+      onPressed: isStartDateBtn
+          ? (isStartDateToggleOn ? () => selectDate(context, true) : null)
+          : (isEndDateToggleOn ? () => selectDate(context, false) : null),
+      child: text(isStartDateBtn
+          ? (selectedStartDate != null
+              ? selectedStartDate.toString().substring(0, 10)
+              : DateTime.now().toString().substring(0, 10))
+          : (selectedEndDate != null
+              ? selectedEndDate.toString().substring(0, 10)
+              : DateTime.now().toString().substring(0, 10))),
+    );
+  }
+
+  Theme theme(Widget? widget) {
+    return Theme(
+      data: Theme.of(context).copyWith(
+        colorScheme: ColorScheme.light(
+          primary: Colors.black,
+          onPrimary: Colors.white,
+          onSurface: Colors.black,
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.black,
+          ),
+        ),
+      ),
+      child: widget!,
+    );
+  }
+
+  Future<DateTime?> pickDate(BuildContext context) async {
+    return await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(DateTime.now().year - 100),
       lastDate: DateTime(DateTime.now().year + 100),
       builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: Colors.black,
-              onPrimary: Colors.white,
-              onSurface: Colors.black,
-            ),
-            textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.black,
-              ),
-            ),
-          ),
-          child: child!,
-        );
+        return theme(child);
       },
     );
+  }
+
+  void updateSelectedDate(DateTime picked, bool isStartDateBtn) {
+    setState(() {
+      if (isStartDateBtn) {
+        selectedStartDate = picked;
+      } else {
+        selectedEndDate = picked;
+      }
+    });
+  }
+
+  Future<void> selectDate(BuildContext context, bool isStartDateBtn) async {
+    final DateTime? picked = await pickDate(context);
 
     if (picked != null) {
-      if (isStartDateBtn == true && picked != selectedStartDate) {
-        setState(() {
-          selectedStartDate = picked;
-        });
-      } else if (isStartDateBtn == false && picked != selectedEndDate) {
-        setState(() {
-          selectedEndDate = picked;
-        });
+      if (isStartDateBtn && picked != selectedStartDate) {
+        updateSelectedDate(picked, true);
+      } else if (!isStartDateBtn && picked != selectedEndDate) {
+        updateSelectedDate(picked, false);
       }
     }
   }
@@ -211,23 +194,10 @@ class GoalFormState extends State<GoalForm> {
       decoration: inputDecoration("Priority"),
       initialValue: selectedPriority,
       isExpanded: true,
-      items: Priority.values.map((Priority priority) {
-        return DropdownMenuItem<Priority>(
-          value: priority,
-          child: Row(
-            children: [
-              Icon(priority.icon),
-              SizedBox(width: 8),
-              Text(
-                priority.level,
-                style: TextStyle(
-                  fontSize: 13,
-                ),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
+      items: buildDropdownItems<Priority>(
+          values: Priority.values,
+          getIcon: (p) => p.icon,
+          getLabel: (p) => p.level),
       onChanged: (Priority? newValue) {
         setState(() {
           selectedPriority = newValue;
