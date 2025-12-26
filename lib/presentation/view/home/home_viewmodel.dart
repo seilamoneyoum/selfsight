@@ -9,7 +9,7 @@ class HomeViewModel extends BaseViewModel {
 
   void addMainGoal() {
     nbMainGoal++;
-    _navigationService.navigateTo(Routes.goalView);
+    _navigationService.navigateTo(Routes.visionBoardView);
   }
 
   void navigateToMainGoalView() {

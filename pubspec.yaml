@@ -41,6 +41,11 @@ dependencies:
   stacked: ^3.4.3
   get_it: ^8.2.0
   image_collage_widget: ^1.1.0
+  image_picker: ^1.2.1
+  resize_rotate_image: ^0.0.6
+  supabase: ^2.10.2
+  supabase_flutter: ^2.12.0
+  flutter_dotenv: ^6.0.0
 
 dev_dependencies:
   flutter_test:

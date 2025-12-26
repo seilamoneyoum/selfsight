@@ -1,7 +1,7 @@
 import 'package:selfsight/domain/entities/task/frequency.dart';
 
 class Task {
-  final String title;
+  final String name;
   final Frequency frequency;
-  Task({required this.title, required this.frequency});
+  Task({required this.name, required this.frequency});
 }

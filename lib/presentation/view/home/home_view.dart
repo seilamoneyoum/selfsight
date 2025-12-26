@@ -26,7 +26,7 @@ class _HomeViewState extends State<HomeView> {
           }),
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: viewModel.addMainGoal, // plus propre
+          onPressed: viewModel.addMainGoal, //onPressed: viewModel.addMainGoal
           child: const Icon(Icons.add),
         ),
       ),

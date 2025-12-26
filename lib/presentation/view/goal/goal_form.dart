@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:selfsight/domain/entities/goal/category.dart';
 import 'package:selfsight/domain/entities/goal/priority.dart';
 import 'package:selfsight/presentation/view/goal/form/confirm_button.dart';
