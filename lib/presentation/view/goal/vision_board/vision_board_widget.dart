@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:selfsight/domain/entities/vision_board/vision_board_item.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:stacked/stacked.dart';
 import 'package:selfsight/presentation/view/goal/vision_board/vision_board_viewmodel.dart';
 
@@ -13,83 +13,65 @@ class VisionBoardView extends StatefulWidget {
 }
 
 class _VisionBoardViewState extends State<VisionBoardView> {
-  List<VisionBoardItem> list = [];
-  XFile? _pickedImage;
-
-  // SIMPLE FUNCTION TO PICK IMAGE
-  Future<void> _pickImage() async {
-    final ImagePicker picker = ImagePicker();
-
-    // Show option: Camera or Gallery
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-
-    if (image != null) {
-      setState(() {
-        _pickedImage = image;
-      });
-    }
-  }
-
-// After picking image, create a draggable widget
-  Widget _buildVisionBoardImage() {
-    return Positioned(
-      //left: 100, // Set position
-      //top: 100,
-      child: Draggable(
-        feedback: Image.file(
-          // What shows while dragging
-          File(_pickedImage!.path),
-          width: 150,
-          height: 150,
-        ),
-        childWhenDragging: Container(),
-        child: Image.file(
-          File(_pickedImage!.path),
-          width: 150,
-          height: 150,
-        ), // Empty when dragging
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder.reactive(
         viewModelBuilder: () => VisionBoardViewModel(),
         builder: (context, viewModel, child) => Scaffold(
-            appBar: AppBar(
-              title: Text(
-                "Vision board",
-                style: GoogleFonts.poppins(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
+              appBar: AppBar(
+                title: Text(
+                  "Vision board",
+                  style: GoogleFonts.poppins(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
                 ),
               ),
-            ),
-            body: Column(
-              children: <Widget>[
-                Expanded(
-                    flex: 6,
-                    child: SizedBox(
-                      child: _pickedImage != null
-                          ? _buildVisionBoardImage()
-                          : Container(), // Or any other placeholder widget when no image is picked
-                    )),
-                Column(
+              body: SizedBox(
+                width: double
+                    .infinity, // 1. Forces the Column to take up the full screen width
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment
+                      .start, // 2. Keeps the content at the very top
+                  crossAxisAlignment: CrossAxisAlignment
+                      .center, // 3. Centers the Stack horizontally
                   children: [
-                    // Button to pick image
-                    ElevatedButton(
-                      onPressed: _pickImage,
-                      child: Text('Add Image to Vision Board'),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.width,
+                      child: Stack(
+                          children:
+                              showImages(viewModel as VisionBoardViewModel)),
                     ),
+                    addImageButton(viewModel),
                   ],
                 ),
-                Expanded(
-                  flex: 3,
-                  child: Container(color: Colors.yellow),
-                ),
-              ],
-            )));
+              ),
+            ));
   }
+}
+
+List<Widget> showImages(VisionBoardViewModel viewModel) {
+  List<Widget> images = [];
+  for (VisionBoardItem item in viewModel.elements) {
+    images.add(Transform.rotate(
+        angle: item.rotation,
+        child: Image.file(File(item.imagePath),
+            width: item.size.width,
+            height: item.size.height,
+            scale: item.scale,
+            fit: BoxFit.cover)));
+  }
+
+  return images;
+}
+
+ElevatedButton addImageButton(VisionBoardViewModel viewModel) {
+  return ElevatedButton(
+      onPressed: () {
+        viewModel.pickMultipleImages();
+      },
+      child: Text("Add Image",
+          style: GoogleFonts.poppins(fontSize: 13, color: Colors.black)));
 }

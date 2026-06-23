@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:selfsight/domain/entities/goal/category.dart';
 import 'package:selfsight/domain/entities/goal/priority.dart';
-import 'package:selfsight/presentation/view/goal/form/confirm_button.dart';
-import 'package:selfsight/presentation/view/goal/form/text.dart';
-import 'package:selfsight/presentation/view/goal/form/build_dropdown_items.dart';
+import 'package:selfsight/presentation/view/general/text.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:selfsight/presentation/view/goal/form/input_decoration.dart';
-import 'package:selfsight/presentation/view/goal/form/title_field.dart';
+import 'package:selfsight/presentation/view/general/input_decoration.dart';
+import 'package:selfsight/presentation/view/general/title_field.dart';
+import 'package:selfsight/presentation/view/goal/goal_viewmodel.dart';
 
 // Create a Form widget.
 class GoalForm extends StatefulWidget {
-  const GoalForm({super.key});
+  final GoalViewModel viewModel;
+
+  const GoalForm({required this.viewModel, super.key});
 
   @override
   GoalFormState createState() {
@@ -20,7 +22,6 @@ class GoalForm extends StatefulWidget {
 
 class GoalFormState extends State<GoalForm> {
   final _formKey = GlobalKey<FormState>();
-
   Category? selectedCategory;
   Priority? selectedPriority;
   DateTime? selectedStartDate;
@@ -36,6 +37,7 @@ class GoalFormState extends State<GoalForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          visionBoardButton(_formKey, context),
           titleField(),
           SizedBox(height: 12),
           categoryDropdown(),
@@ -52,6 +54,40 @@ class GoalFormState extends State<GoalForm> {
         ],
       ),
     );
+  }
+
+  ElevatedButton visionBoardButton(
+      GlobalKey<FormState> formKey, BuildContext context) {
+    return ElevatedButton(
+        onPressed: () {
+          if (formKey.currentState!.validate()) {
+            widget.viewModel.navigateToVisionBoardView();
+          }
+        },
+        child: Text("Set Vision Board",
+            style: GoogleFonts.poppins(fontSize: 13, color: Colors.black)));
+  }
+
+  List<DropdownMenuItem<T>> buildDropdownItems<T>({
+    required List<T> values,
+    required IconData Function(T) getIcon,
+    required String Function(T) getLabel,
+  }) {
+    return values.map((value) {
+      return DropdownMenuItem<T>(
+        value: value,
+        child: Row(
+          children: [
+            Icon(getIcon(value)),
+            const SizedBox(width: 8),
+            Text(
+              getLabel(value),
+              style: const TextStyle(fontSize: 13),
+            ),
+          ],
+        ),
+      );
+    }).toList();
   }
 
   DropdownButtonFormField<Category> categoryDropdown() {
@@ -158,8 +194,8 @@ class GoalFormState extends State<GoalForm> {
     return await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime(DateTime.now().year - 100),
-      lastDate: DateTime(DateTime.now().year + 100),
+      firstDate: DateTime(DateTime.now().year - 50),
+      lastDate: DateTime(DateTime.now().year + 50),
       builder: (context, child) {
         return theme(child);
       },
@@ -203,5 +239,19 @@ class GoalFormState extends State<GoalForm> {
         });
       },
     );
+  }
+
+  ElevatedButton confirmButton(
+      GlobalKey<FormState> formKey, BuildContext context) {
+    return ElevatedButton(
+        onPressed: () {
+          if (formKey.currentState!.validate()) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Processing Data')),
+            );
+          }
+        },
+        child: Text("Confirm",
+            style: GoogleFonts.poppins(fontSize: 13, color: Colors.black)));
   }
 }

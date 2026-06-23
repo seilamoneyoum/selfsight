@@ -12,4 +12,6 @@ class VisionBoard {
       {required this.snapshot,
       this.items = const [],
       this.boardSize = const Size(1000, 1000)});
+
+  List<VisionBoardItem>? get elements => null;
 }

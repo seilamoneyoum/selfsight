@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:selfsight/domain/entities/vision_board/vision_board_item.dart';
+import 'package:selfsight/presentation/view/goal/goal_form.dart';
 import 'package:selfsight/presentation/view/goal/goal_viewmodel.dart';
+
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stacked/stacked.dart';
 
@@ -31,7 +33,19 @@ class _GoalViewState extends State<GoalView> {
         body: Container(
           margin: EdgeInsets.all(16.0), // Space around all edges
           child: Column(
-            children: [SizedBox(height: 20.0)],
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 20.0),
+
+              // 1. Add your missing form widget here
+              Expanded(
+                child: SingleChildScrollView(
+                  child: GoalForm(
+                      viewModel: viewModel
+                          as GoalViewModel), // Or whatever your exact form widget/fields are named
+                ),
+              ),
+            ],
           ),
         ),
       ),

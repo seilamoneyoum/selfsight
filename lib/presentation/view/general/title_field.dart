@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:selfsight/presentation/view/goal/form/input_decoration.dart';
+import 'package:selfsight/presentation/view/general/input_decoration.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 TextFormField titleField() {
