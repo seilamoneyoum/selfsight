@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:selfsight/domain/entities/vision_board/vision_board_item.dart';
 import 'package:stacked/stacked.dart';
 import 'package:selfsight/presentation/view/goal/vision_board/vision_board_viewmodel.dart';
@@ -55,15 +54,32 @@ class _VisionBoardViewState extends State<VisionBoardView> {
 List<Widget> showImages(VisionBoardViewModel viewModel) {
   List<Widget> images = [];
   for (VisionBoardItem item in viewModel.elements) {
-    images.add(Transform.rotate(
-        angle: item.rotation,
-        child: Image.file(File(item.imagePath),
-            width: item.size.width,
-            height: item.size.height,
-            scale: item.scale,
-            fit: BoxFit.cover)));
+    images.add(
+      Positioned(
+        left: item.position.dx,
+        top: item.position.dy,
+        child: GestureDetector(
+          onPanUpdate: (details) {
+            // Update position when dragging
+            item.position = Offset(
+              item.position.dx + details.delta.dx,
+              item.position.dy + details.delta.dy,
+            );
+            viewModel.notifyListeners(); // Rebuild UI
+          },
+          child: Transform.rotate(
+            angle: item.rotation,
+            child: Image.file(
+              File(item.imagePath),
+              width: item.size.width,
+              height: item.size.height,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+      ),
+    );
   }
-
   return images;
 }
 

@@ -3,13 +3,13 @@ import 'dart:ui';
 class VisionBoardItem {
   final String id;
   final String imagePath;
-  final Offset position;
-  final Size size;
-  final double rotation;
-  final double scale;
+  Offset position;
+  Size size;
+  double rotation;
+  double scale;
   final String createAt;
 
-  const VisionBoardItem({
+  VisionBoardItem({
     required this.id,
     required this.position,
     required this.size,
