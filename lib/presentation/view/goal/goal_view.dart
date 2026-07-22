@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:selfsight/domain/entities/vision_board/vision_board_item.dart';
 import 'package:selfsight/presentation/view/goal/goal_form.dart';
 import 'package:selfsight/presentation/view/goal/goal_viewmodel.dart';
-
-import 'package:google_fonts/google_fonts.dart';
+import 'package:selfsight/presentation/view/general/title_interface.dart';
 import 'package:stacked/stacked.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class GoalView extends StatefulWidget {
   const GoalView({super.key});
@@ -21,28 +21,17 @@ class _GoalViewState extends State<GoalView> {
       viewModelBuilder: () => GoalViewModel(),
       builder: (context, viewModel, child) => Scaffold(
         appBar: AppBar(
-          title: Text(
-            "New goal",
-            style: GoogleFonts.poppins(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
+          title: titleInterface("New goal"),
         ),
         body: Container(
-          margin: EdgeInsets.all(16.0), // Space around all edges
+          margin: EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20.0),
-
-              // 1. Add your missing form widget here
               Expanded(
                 child: SingleChildScrollView(
-                  child: GoalForm(
-                      viewModel: viewModel
-                          as GoalViewModel), // Or whatever your exact form widget/fields are named
+                  child: GoalForm(viewModel: viewModel as GoalViewModel),
                 ),
               ),
             ],

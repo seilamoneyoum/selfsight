@@ -7,13 +7,43 @@ import 'package:stacked/stacked.dart';
 
 class VisionBoardViewModel extends BaseViewModel {
   late VisionBoard visionBoard;
+  bool isImageBackgroundSelected = false;
   List<VisionBoardItem> elements = [];
+  Color _backgroundColor = Colors.white;
+  File? _backgroundImage;
 
   List<VisionBoardItem> get allElements => visionBoard.elements ?? [];
+  Color get backgroundColor => _backgroundColor;
+  File? get backgroundImage => _backgroundImage;
+
+  set backgroundColor(Color newColor) {
+    isImageBackgroundSelected = false;
+    _backgroundColor = newColor;
+    notifyListeners();
+  }
+
+  set backgroundImage(File? newFile) {
+    isImageBackgroundSelected = true;
+    _backgroundImage = newFile;
+    notifyListeners();
+  }
+
+  void pickBackgroundImage() async {
+    final XFile? selectedXFile = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 20,
+    );
+
+    if (selectedXFile == null) return;
+
+    backgroundImage = File(selectedXFile.path);
+
+    notifyListeners();
+  }
 
   void pickMultipleImages() async {
     final List<XFile> selectedXImages = await ImagePicker().pickMultiImage(
-      imageQuality: 50,
+      imageQuality: 20,
     );
 
     if (selectedXImages.isEmpty) return;

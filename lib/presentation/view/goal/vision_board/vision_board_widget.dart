@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:selfsight/domain/entities/vision_board/vision_board_item.dart';
 import 'package:stacked/stacked.dart';
 import 'package:selfsight/presentation/view/goal/vision_board/vision_board_viewmodel.dart';
+import 'package:selfsight/presentation/view/general/title_interface.dart';
 
 class VisionBoardView extends StatefulWidget {
   const VisionBoardView({super.key});
@@ -16,38 +18,39 @@ class _VisionBoardViewState extends State<VisionBoardView> {
   Widget build(BuildContext context) {
     return ViewModelBuilder.reactive(
         viewModelBuilder: () => VisionBoardViewModel(),
-        builder: (context, viewModel, child) => Scaffold(
-              appBar: AppBar(
-                title: Text(
-                  "Vision board",
-                  style: GoogleFonts.poppins(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
+        builder: (context, viewModel, child) {
+          viewModel as VisionBoardViewModel;
+          return Scaffold(
+            appBar: AppBar(title: titleInterface("Vision board")),
+            body: SizedBox(
+              width: double.infinity,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    decoration: viewModel.isImageBackgroundSelected
+                        ? BoxDecoration(
+                            image: DecorationImage(
+                              image: FileImage(viewModel.backgroundImage!),
+                              fit: BoxFit.cover,
+                            ),
+                          )
+                        : null,
+                    color: viewModel.isImageBackgroundSelected
+                        ? null
+                        : viewModel.backgroundColor,
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.width,
+                    child: Stack(children: showImages(viewModel)),
                   ),
-                ),
+                  addImageButton(viewModel),
+                  selectBackgroundButton(context, viewModel)
+                ],
               ),
-              body: SizedBox(
-                width: double
-                    .infinity, // 1. Forces the Column to take up the full screen width
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment
-                      .start, // 2. Keeps the content at the very top
-                  crossAxisAlignment: CrossAxisAlignment
-                      .center, // 3. Centers the Stack horizontally
-                  children: [
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.width,
-                      child: Stack(
-                          children:
-                              showImages(viewModel as VisionBoardViewModel)),
-                    ),
-                    addImageButton(viewModel),
-                  ],
-                ),
-              ),
-            ));
+            ),
+          );
+        });
   }
 }
 
@@ -90,4 +93,80 @@ ElevatedButton addImageButton(VisionBoardViewModel viewModel) {
       },
       child: Text("Add Image",
           style: GoogleFonts.poppins(fontSize: 13, color: Colors.black)));
+}
+
+ElevatedButton selectBackgroundButton(
+    BuildContext context, VisionBoardViewModel viewModel) {
+  return ElevatedButton(
+      onPressed: () {
+        _showOptionMenu(context, viewModel);
+      },
+      child: Text("Select background",
+          style: GoogleFonts.poppins(fontSize: 13, color: Colors.black)));
+}
+
+void _showOptionMenu(BuildContext context, VisionBoardViewModel viewModel) {
+  showModalBottomSheet(
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
+    ),
+    builder: (BuildContext context) {
+      return SafeArea(
+        child: Wrap(
+          children: <Widget>[
+            ListTile(
+                title: const Text('Select color background'),
+                onTap: () {
+                  _showColorPicker(context, viewModel);
+                }),
+            ListTile(
+              title: const Text('Select image background'),
+              onTap: () {
+                viewModel.pickBackgroundImage();
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: const Text('Cancel'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+void _showColorPicker(BuildContext context, VisionBoardViewModel viewModel) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      Color tempColor = viewModel.backgroundColor;
+      return AlertDialog(
+        title: Text('Pick a color'),
+        content: ColorPicker(
+          pickerColor: tempColor,
+          onColorChanged: (Color color) {
+            tempColor = color;
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              viewModel.backgroundColor = tempColor;
+              Navigator.pop(context);
+            },
+            child: Text('Apply'),
+          ),
+        ],
+      );
+    },
+  );
 }

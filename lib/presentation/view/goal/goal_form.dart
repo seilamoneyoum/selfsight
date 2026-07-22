@@ -8,7 +8,6 @@ import 'package:selfsight/presentation/view/general/input_decoration.dart';
 import 'package:selfsight/presentation/view/general/title_field.dart';
 import 'package:selfsight/presentation/view/goal/goal_viewmodel.dart';
 
-// Create a Form widget.
 class GoalForm extends StatefulWidget {
   final GoalViewModel viewModel;
 
@@ -64,8 +63,13 @@ class GoalFormState extends State<GoalForm> {
             widget.viewModel.navigateToVisionBoardView();
           }
         },
-        child: Text("Set Vision Board",
-            style: GoogleFonts.poppins(fontSize: 13, color: Colors.black)));
+        child: Text(
+          "Set Vision Board",
+          style: GoogleFonts.poppins(
+            fontSize: 13,
+            color: Colors.black,
+          ),
+        ));
   }
 
   List<DropdownMenuItem<T>> buildDropdownItems<T>({
@@ -111,7 +115,13 @@ class GoalFormState extends State<GoalForm> {
   Row isAccomplishedCheckbox() {
     return Row(
       children: [
-        text("Is accomplished?"),
+        Text(
+          "Is accomplished?",
+          style: GoogleFonts.poppins(
+            fontSize: 13,
+            color: Colors.black,
+          ),
+        ),
         Checkbox(
             checkColor: Colors.white,
             value: isAccomplished,
@@ -130,7 +140,15 @@ class GoalFormState extends State<GoalForm> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(width: 90, child: text(label)),
+            SizedBox(
+                width: 90,
+                child: Text(
+                  label,
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    color: Colors.black,
+                  ),
+                )),
             SizedBox(
               width: 60,
               child: Transform.scale(
@@ -162,13 +180,19 @@ class GoalFormState extends State<GoalForm> {
       onPressed: isStartDateBtn
           ? (isStartDateToggleOn ? () => selectDate(context, true) : null)
           : (isEndDateToggleOn ? () => selectDate(context, false) : null),
-      child: text(isStartDateBtn
-          ? (selectedStartDate != null
-              ? selectedStartDate.toString().substring(0, 10)
-              : DateTime.now().toString().substring(0, 10))
-          : (selectedEndDate != null
-              ? selectedEndDate.toString().substring(0, 10)
-              : DateTime.now().toString().substring(0, 10))),
+      child: Text(
+        (isStartDateBtn
+            ? (selectedStartDate != null
+                ? selectedStartDate.toString().substring(0, 10)
+                : DateTime.now().toString().substring(0, 10))
+            : (selectedEndDate != null
+                ? selectedEndDate.toString().substring(0, 10)
+                : DateTime.now().toString().substring(0, 10))),
+        style: GoogleFonts.poppins(
+          fontSize: 13,
+          color: Colors.black,
+        ),
+      ),
     );
   }
 
