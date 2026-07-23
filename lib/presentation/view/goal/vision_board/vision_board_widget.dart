@@ -56,20 +56,28 @@ class _VisionBoardViewState extends State<VisionBoardView> {
 
 List<Widget> showImages(VisionBoardViewModel viewModel) {
   List<Widget> images = [];
-  for (VisionBoardItem item in viewModel.elements) {
+  for (VisionBoardItem item in viewModel.allElements) {
     images.add(
       Positioned(
         left: item.position.dx,
         top: item.position.dy,
         child: GestureDetector(
+          onTap: () {
+            // Affiche l'option delete
+          },
+          //onScaleUpdate: (details) {
+          // Mise à jour de la taille de l'image de l'image
+          //},
           onPanUpdate: (details) {
-            // Update position when dragging
+            // Mise à jour de la position de l'image
             item.position = Offset(
               item.position.dx + details.delta.dx,
               item.position.dy + details.delta.dy,
             );
-            viewModel.notifyListeners(); // Rebuild UI
+            viewModel.selectedIndex = item.id;
+            viewModel.notifyListeners();
           },
+          onPanEnd: (details) {},
           child: Transform.rotate(
             angle: item.rotation,
             child: Image.file(

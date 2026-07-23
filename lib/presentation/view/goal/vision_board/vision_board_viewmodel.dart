@@ -4,15 +4,17 @@ import 'package:image_picker/image_picker.dart';
 import 'package:selfsight/domain/entities/vision_board/vision_board.dart';
 import 'package:selfsight/domain/entities/vision_board/vision_board_item.dart';
 import 'package:stacked/stacked.dart';
+import 'package:image/image.dart' as image;
 
 class VisionBoardViewModel extends BaseViewModel {
-  late VisionBoard visionBoard;
+  //late VisionBoard visionBoard;
   bool isImageBackgroundSelected = false;
   List<VisionBoardItem> elements = [];
   Color _backgroundColor = Colors.white;
   File? _backgroundImage;
+  String selectedIndex = "-1";
 
-  List<VisionBoardItem> get allElements => visionBoard.elements ?? [];
+  List<VisionBoardItem> get allElements => elements;
   Color get backgroundColor => _backgroundColor;
   File? get backgroundImage => _backgroundImage;
 
@@ -45,28 +47,50 @@ class VisionBoardViewModel extends BaseViewModel {
     final List<XFile> selectedXImages = await ImagePicker().pickMultiImage(
       imageQuality: 20,
     );
-
     if (selectedXImages.isEmpty) return;
 
-    final List<File> selectedImages =
-        selectedXImages.map((xfile) => File(xfile.path)).toList();
+    // Convert each file to a VisionBoardItem asynchronously
+    List<Future<VisionBoardItem>> futures = selectedXImages
+        .map((xfile) => convertToVisionBoardItem(File(xfile.path)))
+        .toList();
 
-    elements +=
-        selectedImages.map((file) => convertToVisionBoardItem(file)).toList();
-
+    List<VisionBoardItem> newItems = await Future.wait(futures);
+    elements.addAll(newItems);
     notifyListeners();
   }
 
-  VisionBoardItem convertToVisionBoardItem(File imageFile) {
+  Future<VisionBoardItem> convertToVisionBoardItem(File imageFile) async {
     return VisionBoardItem(
       position: Offset(100, 100),
-      size: Size(100, 100),
+      size: await getScaledWidth(imageFile),
       imagePath: imageFile.path,
       id: UniqueKey().toString(),
       rotation: 0,
       scale: 1,
       createAt: DateTime.now().toIso8601String(),
     );
+  }
+
+  Future<Size> getScaledWidth(File imageFile) async {
+    final bytes = await imageFile.readAsBytes();
+    final decodedImage = image.decodeImage(bytes);
+
+    final originalWidth = decodedImage?.width ?? 100;
+    final originalHeight = decodedImage?.height ?? 100;
+
+    const double maxSize = 150.0;
+
+    double scale = 1.0;
+    if (originalWidth > maxSize || originalHeight > maxSize) {
+      double scaleW = maxSize / originalWidth;
+      double scaleH = maxSize / originalHeight;
+      scale = scaleW < scaleH ? scaleW : scaleH;
+    }
+
+    final scaledWidth = originalWidth * scale;
+    final scaledHeight = originalHeight * scale;
+
+    return Size(scaledWidth, scaledHeight);
   }
 
   void addImages() {}
