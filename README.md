@@ -1,16 +1,16 @@
 # selfsight
 
-A new Flutter project.
+## Présentation
 
-## Getting Started
+selfsight est une application Flutter conçue pour vous aider à visualiser vos objectifs, organiser vos tâches quotidiennes et suivre votre progression personnelle. Elle permet de mettre en place les actions concrètes à effectuer grâce à un tableau de vision interactif, un gestionnaire de tâches et des statistiques détaillées.
 
-This project is a starting point for a Flutter application.
+## Fonctionnalités principales
 
-A few resources to get you started if this is your first Flutter project:
+*   Vision Board : Créez un tableau d'inspiration visuel en ajoutant des images et des textes pour matérialiser vos objectifs à long terme.
+*   Gestion des tâches : Décomposez vos visions en tâches claires et réalisables, et suivez leur état d'avancement.
+*   Statistiques de progression : Visualisez vos performances grâce à des graphiques et des indicateurs qui analysent votre productivité et votre évolution.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Aperçu de l'application
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+[À insérer plus tard]
+
