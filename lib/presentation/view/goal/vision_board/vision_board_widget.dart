@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:selfsight/domain/entities/vision_board/vision_board_item.dart';
+import 'package:selfsight/presentation/view/goal/vision_board/background_manipulations.dart';
 import 'package:stacked/stacked.dart';
 import 'package:selfsight/presentation/view/goal/vision_board/vision_board_viewmodel.dart';
 import 'package:selfsight/presentation/view/general/title_interface.dart';
@@ -44,8 +44,41 @@ class _VisionBoardViewState extends State<VisionBoardView> {
                     height: MediaQuery.of(context).size.width,
                     child: Stack(children: showImages(viewModel)),
                   ),
-                  addImageButton(viewModel),
-                  selectBackgroundButton(context, viewModel)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: <Widget>[
+                      if (viewModel.isRotateBtnClicked)
+                        Slider(
+                          value: viewModel.selectedItem!.rotation,
+                          onChanged: (value) {
+                            setState(() {
+                              viewModel.selectedItem!.rotation = value;
+                              viewModel.notifyListeners();
+                            });
+                          },
+                          min: 0,
+                          max: 6.2832,
+                        ),
+                      if (viewModel.isResizeBtnClicked)
+                        Slider(
+                          value: viewModel.selectedItem!.scale,
+                          onChanged: (value) {
+                            setState(() {
+                              viewModel.selectedItem!.scale = value;
+                              viewModel.notifyListeners();
+                            });
+                          },
+                          min: 1,
+                          max: 10,
+                        ),
+                    ],
+                  ),
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        addImageButton(viewModel),
+                        selectBackgroundButton(context, viewModel)
+                      ]),
                 ],
               ),
             ),
@@ -63,35 +96,104 @@ List<Widget> showImages(VisionBoardViewModel viewModel) {
         top: item.position.dy,
         child: GestureDetector(
           onTap: () {
-            // Affiche l'option delete
+            viewModel.resetValues();
+            viewModel.selectItem(item.id);
           },
-          //onScaleUpdate: (details) {
-          // Mise à jour de la taille de l'image de l'image
-          //},
+          onPanStart: (details) {
+            viewModel.resetValues();
+          },
           onPanUpdate: (details) {
             // Mise à jour de la position de l'image
             item.position = Offset(
               item.position.dx + details.delta.dx,
               item.position.dy + details.delta.dy,
             );
-            viewModel.selectedIndex = item.id;
             viewModel.notifyListeners();
           },
-          onPanEnd: (details) {},
-          child: Transform.rotate(
-            angle: item.rotation,
-            child: Image.file(
-              File(item.imagePath),
-              width: item.size.width,
-              height: item.size.height,
-              fit: BoxFit.cover,
-            ),
+          onPanEnd: (details) {
+            viewModel.selectItem(item.id);
+          },
+          child: Stack(
+            children: [
+              Transform.rotate(
+                angle: item.rotation,
+                child: Image.file(
+                  File(item.imagePath),
+                  width: item.size.width,
+                  height: item.size.height,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              if (viewModel.selectedId == item.id)
+                removeImageButton(viewModel, item),
+              if (viewModel.selectedId == item.id)
+                rotateImageButton(viewModel, item),
+              if (viewModel.selectedId == item.id)
+                resizeImageButton(viewModel, item)
+            ],
           ),
         ),
       ),
     );
   }
   return images;
+}
+
+Positioned removeImageButton(
+    VisionBoardViewModel viewModel, VisionBoardItem item) {
+  return Positioned(
+      right: 0,
+      top: 0,
+      child: GestureDetector(
+        onTap: () => viewModel.removeItem(item.id),
+        child: Container(
+          decoration:
+              const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+          padding: const EdgeInsets.all(4),
+          child: const Icon(Icons.close, color: Colors.white, size: 13),
+        ),
+      ));
+}
+
+Positioned rotateImageButton(
+    VisionBoardViewModel viewModel, VisionBoardItem item) {
+  return Positioned(
+      right: 0,
+      left: 0,
+      top: 0,
+      child: GestureDetector(
+        onTap: () {
+          viewModel.isRotateBtnClicked = true;
+          viewModel.isResizeBtnClicked = false;
+          viewModel.notifyListeners();
+        },
+        child: Container(
+          decoration:
+              const BoxDecoration(color: Colors.grey, shape: BoxShape.circle),
+          padding: const EdgeInsets.all(4),
+          child: const Icon(Icons.rotate_left, color: Colors.white, size: 13),
+        ),
+      ));
+}
+
+Positioned resizeImageButton(
+    VisionBoardViewModel viewModel, VisionBoardItem item) {
+  return Positioned(
+      left: 0,
+      top: 0,
+      child: GestureDetector(
+        onTap: () {
+          viewModel.isRotateBtnClicked = false;
+          viewModel.isResizeBtnClicked = true;
+          viewModel.notifyListeners();
+        },
+        child: Container(
+          decoration:
+              const BoxDecoration(color: Colors.grey, shape: BoxShape.circle),
+          padding: const EdgeInsets.all(4),
+          child: const Icon(Icons.crop, color: Colors.white, size: 13),
+        ),
+      ));
 }
 
 ElevatedButton addImageButton(VisionBoardViewModel viewModel) {
@@ -107,74 +209,8 @@ ElevatedButton selectBackgroundButton(
     BuildContext context, VisionBoardViewModel viewModel) {
   return ElevatedButton(
       onPressed: () {
-        _showOptionMenu(context, viewModel);
+        showOptionMenu(context, viewModel);
       },
       child: Text("Select background",
           style: GoogleFonts.poppins(fontSize: 13, color: Colors.black)));
-}
-
-void _showOptionMenu(BuildContext context, VisionBoardViewModel viewModel) {
-  showModalBottomSheet(
-    context: context,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
-    ),
-    builder: (BuildContext context) {
-      return SafeArea(
-        child: Wrap(
-          children: <Widget>[
-            ListTile(
-                title: const Text('Select color background'),
-                onTap: () {
-                  _showColorPicker(context, viewModel);
-                }),
-            ListTile(
-              title: const Text('Select image background'),
-              onTap: () {
-                viewModel.pickBackgroundImage();
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: const Text('Cancel'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        ),
-      );
-    },
-  );
-}
-
-void _showColorPicker(BuildContext context, VisionBoardViewModel viewModel) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      Color tempColor = viewModel.backgroundColor;
-      return AlertDialog(
-        title: Text('Pick a color'),
-        content: ColorPicker(
-          pickerColor: tempColor,
-          onColorChanged: (Color color) {
-            tempColor = color;
-          },
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              viewModel.backgroundColor = tempColor;
-              Navigator.pop(context);
-            },
-            child: Text('Apply'),
-          ),
-        ],
-      );
-    },
-  );
 }

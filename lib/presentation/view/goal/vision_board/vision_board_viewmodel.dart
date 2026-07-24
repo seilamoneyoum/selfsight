@@ -7,12 +7,19 @@ import 'package:stacked/stacked.dart';
 import 'package:image/image.dart' as image;
 
 class VisionBoardViewModel extends BaseViewModel {
+  double? _gestureStartScale;
+  double? _gestureStartRotation;
+  Offset? _gestureStartPosition;
+
   //late VisionBoard visionBoard;
+  bool isRotateBtnClicked = false;
+  bool isResizeBtnClicked = false;
   bool isImageBackgroundSelected = false;
   List<VisionBoardItem> elements = [];
+  VisionBoardItem? selectedItem;
   Color _backgroundColor = Colors.white;
   File? _backgroundImage;
-  String selectedIndex = "-1";
+  String selectedId = "-1";
 
   List<VisionBoardItem> get allElements => elements;
   Color get backgroundColor => _backgroundColor;
@@ -27,6 +34,27 @@ class VisionBoardViewModel extends BaseViewModel {
   set backgroundImage(File? newFile) {
     isImageBackgroundSelected = true;
     _backgroundImage = newFile;
+    notifyListeners();
+  }
+
+  void resetValues() {
+    selectedId = "-1";
+    selectedItem = null;
+    isRotateBtnClicked = false;
+    isResizeBtnClicked = false;
+    notifyListeners();
+  }
+
+  void selectItem(String id) {
+    selectedId = id;
+    selectedItem = elements.where((item) => item.id == id).first;
+    notifyListeners();
+  }
+
+  void removeItem(String id) {
+    elements.removeWhere((item) => item.id == id);
+    selectedId = "-1";
+    selectedItem = null;
     notifyListeners();
   }
 
@@ -49,7 +77,6 @@ class VisionBoardViewModel extends BaseViewModel {
     );
     if (selectedXImages.isEmpty) return;
 
-    // Convert each file to a VisionBoardItem asynchronously
     List<Future<VisionBoardItem>> futures = selectedXImages
         .map((xfile) => convertToVisionBoardItem(File(xfile.path)))
         .toList();
