@@ -5,15 +5,27 @@ import 'package:selfsight/domain/entities/vision_board/vision_board.dart';
 import 'package:selfsight/domain/entities/vision_board/vision_board_item.dart';
 import 'package:stacked/stacked.dart';
 import 'package:image/image.dart' as image;
+import 'package:path_provider/path_provider.dart';
 
 class VisionBoardViewModel extends BaseViewModel {
-  double? _gestureStartScale;
-  double? _gestureStartRotation;
-  Offset? _gestureStartPosition;
+  int _pointerCount = 0;
+
+  double? gestureStartScale;
+  double? gestureStartRotation;
+
+  void incrementPointerCount() {
+    _pointerCount++;
+    notifyListeners();
+  }
+
+  void decrementPointerCount() {
+    if (_pointerCount > 0) _pointerCount--;
+    notifyListeners();
+  }
+
+  bool get isMultiTouch => _pointerCount >= 2;
 
   //late VisionBoard visionBoard;
-  bool isRotateBtnClicked = false;
-  bool isResizeBtnClicked = false;
   bool isImageBackgroundSelected = false;
   List<VisionBoardItem> elements = [];
   VisionBoardItem? selectedItem;
@@ -40,8 +52,6 @@ class VisionBoardViewModel extends BaseViewModel {
   void resetValues() {
     selectedId = "-1";
     selectedItem = null;
-    isRotateBtnClicked = false;
-    isResizeBtnClicked = false;
     notifyListeners();
   }
 
@@ -52,6 +62,15 @@ class VisionBoardViewModel extends BaseViewModel {
   }
 
   void removeItem(String id) {
+    final itemToRemove = elements.firstWhere((item) => item.id == id);
+
+    try {
+      final file = File(itemToRemove.imagePath);
+      if (file.existsSync()) {
+        file.deleteSync();
+      }
+    } catch (e) {}
+
     elements.removeWhere((item) => item.id == id);
     selectedId = "-1";
     selectedItem = null;
@@ -77,8 +96,11 @@ class VisionBoardViewModel extends BaseViewModel {
     );
     if (selectedXImages.isEmpty) return;
 
+    final Directory appDocDir = await getApplicationDocumentsDirectory();
+    final String appDocPath = appDocDir.path;
+
     List<Future<VisionBoardItem>> futures = selectedXImages
-        .map((xfile) => convertToVisionBoardItem(File(xfile.path)))
+        .map((xfile) => convertToVisionBoardItem(xfile, appDocPath))
         .toList();
 
     List<VisionBoardItem> newItems = await Future.wait(futures);
@@ -86,11 +108,56 @@ class VisionBoardViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  Future<VisionBoardItem> convertToVisionBoardItem(File imageFile) async {
+  Future<VisionBoardItem> convertToVisionBoardItem(
+    XFile xFile, // Now takes XFile directly, not File
+    String persistentDirectoryPath,
+  ) async {
+    // 1. Generate a unique filename to prevent collisions
+    //    Using microseconds + original filename is safe
+    final String uniqueFileName =
+        '${DateTime.now().microsecondsSinceEpoch}_${xFile.name}';
+
+    // 2. Create the destination File in the app's Documents folder
+    final File persistentFile = File(
+      '$persistentDirectoryPath/$uniqueFileName',
+    );
+
+    // 3. CRITICAL: Copy the temporary file to the persistent location
+    //    If the temporary file is deleted, `xFile.path` still holds the path,
+    //    but `await File(xFile.path).copy()` will fail.
+    //    Safer approach: read bytes from the XFile and write them.
+    try {
+      final bytes = await xFile.readAsBytes();
+      await persistentFile.writeAsBytes(bytes);
+    } catch (e) {
+      // Fallback: If reading from XFile fails, try copying the File path.
+      // This rarely happens, but it's safe.
+      await File(xFile.path).copy(persistentFile.path);
+    }
+
+    // 4. Now decode the persistent file to get its dimensions
+    final bytes = await persistentFile.readAsBytes();
+    final decodedImage = image.decodeImage(bytes);
+
+    final originalWidth = decodedImage?.width ?? 100;
+    final originalHeight = decodedImage?.height ?? 100;
+
+    const double maxSize = 150.0;
+    double scale = 1.0;
+    if (originalWidth > maxSize || originalHeight > maxSize) {
+      double scaleW = maxSize / originalWidth;
+      double scaleH = maxSize / originalHeight;
+      scale = scaleW < scaleH ? scaleW : scaleH;
+    }
+
+    final scaledWidth = originalWidth * scale;
+    final scaledHeight = originalHeight * scale;
+
+    // 5. Return the item using the NEW persistent file path
     return VisionBoardItem(
       position: Offset(100, 100),
-      size: await getScaledWidth(imageFile),
-      imagePath: imageFile.path,
+      size: Size(scaledWidth, scaledHeight),
+      imagePath: persistentFile.path, // <-- PERSISTENT PATH
       id: UniqueKey().toString(),
       rotation: 0,
       scale: 1,

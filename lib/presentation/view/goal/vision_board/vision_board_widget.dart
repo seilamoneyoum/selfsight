@@ -46,32 +46,7 @@ class _VisionBoardViewState extends State<VisionBoardView> {
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: <Widget>[
-                      if (viewModel.isRotateBtnClicked)
-                        Slider(
-                          value: viewModel.selectedItem!.rotation,
-                          onChanged: (value) {
-                            setState(() {
-                              viewModel.selectedItem!.rotation = value;
-                              viewModel.notifyListeners();
-                            });
-                          },
-                          min: 0,
-                          max: 6.2832,
-                        ),
-                      if (viewModel.isResizeBtnClicked)
-                        Slider(
-                          value: viewModel.selectedItem!.scale,
-                          onChanged: (value) {
-                            setState(() {
-                              viewModel.selectedItem!.scale = value;
-                              viewModel.notifyListeners();
-                            });
-                          },
-                          min: 1,
-                          max: 10,
-                        ),
-                    ],
+                    children: <Widget>[],
                   ),
                   Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -94,49 +69,64 @@ List<Widget> showImages(VisionBoardViewModel viewModel) {
       Positioned(
         left: item.position.dx,
         top: item.position.dy,
-        child: GestureDetector(
-          onTap: () {
-            viewModel.resetValues();
-            viewModel.selectItem(item.id);
-          },
-          onPanStart: (details) {
-            viewModel.resetValues();
-          },
-          onPanUpdate: (details) {
-            // Mise à jour de la position de l'image
-            item.position = Offset(
-              item.position.dx + details.delta.dx,
-              item.position.dy + details.delta.dy,
-            );
-            viewModel.notifyListeners();
-          },
-          onPanEnd: (details) {
-            viewModel.selectItem(item.id);
-          },
-          child: Stack(
-            children: [
-              Transform.rotate(
+        child: Stack(
+          children: [
+            GestureDetector(
+              onScaleStart: (details) {
+                viewModel.gestureStartScale = item.scale;
+                viewModel.gestureStartRotation = item.rotation;
+                viewModel.selectItem(item.id);
+              },
+              onScaleUpdate: (details) =>
+                  gestureDetectorAct(details, viewModel, item),
+              onScaleEnd: (details) {
+                viewModel.gestureStartScale = null;
+                viewModel.gestureStartRotation = null;
+              },
+              onTap: () {
+                viewModel.selectItem(item.id);
+              },
+              child: Transform.rotate(
                 angle: item.rotation,
                 child: Image.file(
                   File(item.imagePath),
-                  width: item.size.width,
-                  height: item.size.height,
+                  width: item.size.width * item.scale,
+                  height: item.size.height * item.scale,
                   fit: BoxFit.cover,
                 ),
               ),
-              if (viewModel.selectedId == item.id)
-                removeImageButton(viewModel, item),
-              if (viewModel.selectedId == item.id)
-                rotateImageButton(viewModel, item),
-              if (viewModel.selectedId == item.id)
-                resizeImageButton(viewModel, item)
-            ],
-          ),
+            ),
+
+            // --- OVERLAY BUTTONS (Remove, Rotate, Resize) ---
+            if (viewModel.selectedId == item.id)
+              removeImageButton(viewModel, item),
+          ],
         ),
       ),
     );
   }
   return images;
+}
+
+void gestureDetectorAct(
+  ScaleUpdateDetails details,
+  VisionBoardViewModel viewModel,
+  VisionBoardItem item,
+) {
+  if (details.pointerCount >= 2) {
+    // Si l'écran détecte deux doigts touchés -> rotation + agrandir/rétrécir image
+    double newScale = (viewModel.gestureStartScale ?? 1.0) * details.scale;
+    item.scale = newScale.clamp(0.5, 5.0);
+
+    item.rotation = (viewModel.gestureStartRotation ?? 0.0) + details.rotation;
+  } else {
+    // Sinon, déplacement de l'image
+    item.position = Offset(
+      item.position.dx + details.focalPointDelta.dx,
+      item.position.dy + details.focalPointDelta.dy,
+    );
+  }
+  viewModel.notifyListeners();
 }
 
 Positioned removeImageButton(
@@ -151,47 +141,6 @@ Positioned removeImageButton(
               const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
           padding: const EdgeInsets.all(4),
           child: const Icon(Icons.close, color: Colors.white, size: 13),
-        ),
-      ));
-}
-
-Positioned rotateImageButton(
-    VisionBoardViewModel viewModel, VisionBoardItem item) {
-  return Positioned(
-      right: 0,
-      left: 0,
-      top: 0,
-      child: GestureDetector(
-        onTap: () {
-          viewModel.isRotateBtnClicked = true;
-          viewModel.isResizeBtnClicked = false;
-          viewModel.notifyListeners();
-        },
-        child: Container(
-          decoration:
-              const BoxDecoration(color: Colors.grey, shape: BoxShape.circle),
-          padding: const EdgeInsets.all(4),
-          child: const Icon(Icons.rotate_left, color: Colors.white, size: 13),
-        ),
-      ));
-}
-
-Positioned resizeImageButton(
-    VisionBoardViewModel viewModel, VisionBoardItem item) {
-  return Positioned(
-      left: 0,
-      top: 0,
-      child: GestureDetector(
-        onTap: () {
-          viewModel.isRotateBtnClicked = false;
-          viewModel.isResizeBtnClicked = true;
-          viewModel.notifyListeners();
-        },
-        child: Container(
-          decoration:
-              const BoxDecoration(color: Colors.grey, shape: BoxShape.circle),
-          padding: const EdgeInsets.all(4),
-          child: const Icon(Icons.crop, color: Colors.white, size: 13),
         ),
       ));
 }
