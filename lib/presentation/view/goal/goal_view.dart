@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:selfsight/domain/entities/vision_board/vision_board_item.dart';
 import 'package:selfsight/presentation/view/goal/goal_form.dart';
 import 'package:selfsight/presentation/view/goal/goal_viewmodel.dart';
-import 'package:selfsight/presentation/view/general/title_interface.dart';
+import 'package:selfsight/presentation/view/templates.dart';
 import 'package:stacked/stacked.dart';
 
 class GoalView extends StatefulWidget {

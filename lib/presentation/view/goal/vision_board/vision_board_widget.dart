@@ -1,11 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:selfsight/domain/entities/vision_board/vision_board_item.dart';
 import 'package:selfsight/presentation/view/goal/vision_board/background_manipulations.dart';
 import 'package:stacked/stacked.dart';
 import 'package:selfsight/presentation/view/goal/vision_board/vision_board_viewmodel.dart';
-import 'package:selfsight/presentation/view/general/title_interface.dart';
+import 'package:selfsight/presentation/view/templates.dart';
 
 class VisionBoardView extends StatefulWidget {
   const VisionBoardView({super.key});
@@ -150,8 +149,7 @@ ElevatedButton addImageButton(VisionBoardViewModel viewModel) {
       onPressed: () {
         viewModel.pickMultipleImages();
       },
-      child: Text("Add Image",
-          style: GoogleFonts.poppins(fontSize: 13, color: Colors.black)));
+      child: message("Add image"));
 }
 
 ElevatedButton selectBackgroundButton(
@@ -160,6 +158,5 @@ ElevatedButton selectBackgroundButton(
       onPressed: () {
         showOptionMenu(context, viewModel);
       },
-      child: Text("Select background",
-          style: GoogleFonts.poppins(fontSize: 13, color: Colors.black)));
+      child: message("Select background"));
 }

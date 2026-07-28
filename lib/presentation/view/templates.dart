@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 // Template du titre d'input
-InputDecoration inputDecoration(String label) {
+InputDecoration labelInput(String label) {
   return InputDecoration(
       labelText: label,
       border: OutlineInputBorder(),
@@ -13,7 +13,7 @@ InputDecoration inputDecoration(String label) {
 }
 
 // Template du texte
-Text text(String message) {
+Text message(String message) {
   return Text(
     message,
     style: GoogleFonts.poppins(
@@ -24,9 +24,9 @@ Text text(String message) {
 }
 
 // Template du titre de l'interface
-Text titleInterface(String message) {
+Text titleInterface(String title) {
   return Text(
-    message,
+    title,
     style: GoogleFonts.poppins(
       fontSize: 24,
       fontWeight: FontWeight.bold,

@@ -4,7 +4,7 @@ import 'package:selfsight/domain/entities/goal/category.dart';
 import 'package:selfsight/domain/entities/goal/priority.dart';
 import 'package:selfsight/domain/entities/goal/progress.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:selfsight/presentation/view/general/input_decoration.dart';
+import 'package:selfsight/presentation/view/templates.dart';
 import 'package:selfsight/presentation/view/goal/goal_viewmodel.dart';
 
 class GoalForm extends StatefulWidget {
@@ -22,7 +22,7 @@ class GoalFormState extends State<GoalForm> {
   final _formKey = GlobalKey<FormState>();
   String? _title;
   Category? _selectedCategory;
-  late Progress __selectedProgress;
+  late Progress _selectedProgress;
 
   bool _isStartDateToggleOn = false;
   bool _isEndDateToggleOn = false;
@@ -34,7 +34,7 @@ class GoalFormState extends State<GoalForm> {
   @override
   void initState() {
     super.initState();
-    __selectedProgress = Progress(isAccomplished: false);
+    _selectedProgress = Progress(isAccomplished: false);
   }
 
   @override
@@ -55,18 +55,17 @@ class GoalFormState extends State<GoalForm> {
           if (_hasCategoryError == true)
             errorMessage("Category needs to be selected"),
           SizedBox(height: 12),
-          dateField("Start date", true, __selectedProgress),
+          dateField("Start date", true, _selectedProgress),
           SizedBox(height: 12),
-          dateField("End date", false, __selectedProgress),
+          dateField("End date", false, _selectedProgress),
           SizedBox(height: 12),
           isAccomplishedCheckbox(),
           SizedBox(height: 12),
-          priorityDropdown(__selectedProgress),
+          priorityDropdown(_selectedProgress),
           if (_hasPriorityError == true)
             errorMessage("Priority needs to be selected"),
           SizedBox(height: 30),
-          confirmButton(_formKey, context, viewModel, _title, _selectedCategory,
-              __selectedProgress)
+          confirmButton(_formKey, context, viewModel)
         ],
       ),
     );
@@ -86,7 +85,7 @@ class GoalFormState extends State<GoalForm> {
 
   TextFormField titleField() {
     return TextFormField(
-      decoration: inputDecoration("Title"),
+      decoration: labelInput("Title"),
       initialValue: _title,
       onChanged: (newTitle) {
         _title = newTitle;
@@ -103,13 +102,7 @@ class GoalFormState extends State<GoalForm> {
             widget.viewModel.navigateToVisionBoardView();
           }
         },
-        child: Text(
-          "Set Vision Board",
-          style: GoogleFonts.poppins(
-            fontSize: 13,
-            color: Colors.black,
-          ),
-        ));
+        child: message("Set Vision Board"));
   }
 
   List<DropdownMenuItem<T>> buildDropdownItems<T>({
@@ -136,7 +129,7 @@ class GoalFormState extends State<GoalForm> {
 
   DropdownButtonFormField<Category> categoryDropdown() {
     return DropdownButtonFormField<Category>(
-      decoration: inputDecoration("Category"),
+      decoration: labelInput("Category"),
       initialValue: _selectedCategory,
       isExpanded: true,
       items: buildDropdownItems<Category>(
@@ -155,19 +148,13 @@ class GoalFormState extends State<GoalForm> {
   Row isAccomplishedCheckbox() {
     return Row(
       children: [
-        Text(
-          "Is accomplished?",
-          style: GoogleFonts.poppins(
-            fontSize: 13,
-            color: Colors.black,
-          ),
-        ),
+        message("Is accomplished?"),
         Checkbox(
             checkColor: Colors.white,
-            value: __selectedProgress.isAccomplished,
+            value: _selectedProgress.isAccomplished,
             onChanged: (bool? value) {
               setState(() {
-                __selectedProgress.isAccomplished = value!;
+                _selectedProgress.isAccomplished = value!;
               });
             })
       ],
@@ -181,15 +168,7 @@ class GoalFormState extends State<GoalForm> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(
-                width: 90,
-                child: Text(
-                  label,
-                  style: GoogleFonts.poppins(
-                    fontSize: 13,
-                    color: Colors.black,
-                  ),
-                )),
+            SizedBox(width: 90, child: message(label)),
             SizedBox(
               width: 60,
               child: Transform.scale(
@@ -218,27 +197,20 @@ class GoalFormState extends State<GoalForm> {
 
   Widget toggleDateButton(bool isStartDateBtn, Progress selectedProgress) {
     return ElevatedButton(
-      onPressed: isStartDateBtn
-          ? (_isStartDateToggleOn
-              ? () => selectDate(context, true, selectedProgress)
-              : null)
-          : (_isEndDateToggleOn
-              ? () => selectDate(context, false, selectedProgress)
-              : null),
-      child: Text(
-        (isStartDateBtn
-            ? (__selectedProgress.startDate != null
-                ? __selectedProgress.startDate.toString().substring(0, 10)
+        onPressed: isStartDateBtn
+            ? (_isStartDateToggleOn
+                ? () => selectDate(context, true, selectedProgress)
+                : null)
+            : (_isEndDateToggleOn
+                ? () => selectDate(context, false, selectedProgress)
+                : null),
+        child: message(isStartDateBtn
+            ? (_selectedProgress.startDate != null
+                ? _selectedProgress.startDate.toString().substring(0, 10)
                 : DateTime.now().toString().substring(0, 10))
-            : (__selectedProgress.endDate != null
-                ? __selectedProgress.endDate.toString().substring(0, 10)
-                : DateTime.now().toString().substring(0, 10))),
-        style: GoogleFonts.poppins(
-          fontSize: 13,
-          color: Colors.black,
-        ),
-      ),
-    );
+            : (_selectedProgress.endDate != null
+                ? _selectedProgress.endDate.toString().substring(0, 10)
+                : DateTime.now().toString().substring(0, 10))));
   }
 
   Theme theme(Widget? widget) {
@@ -274,9 +246,9 @@ class GoalFormState extends State<GoalForm> {
   void updateSelectedDate(DateTime picked, bool isStartDateBtn) {
     setState(() {
       if (isStartDateBtn) {
-        __selectedProgress.startDate = picked;
+        _selectedProgress.startDate = picked;
       } else {
-        __selectedProgress.endDate = picked;
+        _selectedProgress.endDate = picked;
       }
     });
   }
@@ -297,7 +269,7 @@ class GoalFormState extends State<GoalForm> {
   DropdownButtonFormField<Priority> priorityDropdown(
       Progress selectedProgress) {
     return DropdownButtonFormField<Priority>(
-      decoration: inputDecoration("Priority"),
+      decoration: labelInput("Priority"),
       initialValue: selectedProgress.priority,
       isExpanded: true,
       items: buildDropdownItems<Priority>(
@@ -313,46 +285,39 @@ class GoalFormState extends State<GoalForm> {
   }
 
   ElevatedButton confirmButton(
-      GlobalKey<FormState> formKey,
-      BuildContext context,
-      GoalViewModel viewModel,
-      String? title,
-      Category? selectedCategory,
-      Progress selectedProgress) {
+    GlobalKey<FormState> formKey,
+    BuildContext context,
+    GoalViewModel viewModel,
+  ) {
     return ElevatedButton(
-        onPressed: () {
-          if (formKey.currentState!.validate()) {
-            formKey.currentState!.save();
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Processing Data')),
-            );
+      onPressed: () {
+        bool isValid = formKey.currentState!.validate();
+        if (isValid) {
+          formKey.currentState!.save();
+        }
 
-            try {
-              viewModel.addGoal(title!, selectedCategory!, selectedProgress);
-            } catch ($e) {
-              if (title == null) {
-                _hasTitleError = true;
-              } else {
-                _hasTitleError = false;
-              }
+        setState(() {
+          _hasTitleError = (_title == null || _title == "");
+          _hasCategoryError = (_selectedCategory == null);
+          _hasPriorityError = (_selectedProgress.priority == null);
+          viewModel.notifyListeners();
+        });
 
-              if (selectedCategory == null) {
-                _hasCategoryError = true;
-              } else {
-                _hasCategoryError = false;
-              }
-
-              if (selectedProgress.priority == null) {
-                _hasPriorityError = true;
-              } else {
-                _hasPriorityError = false;
-              }
-
-              viewModel.notifyListeners();
-            }
-          }
-        },
-        child: Text("Confirm",
-            style: GoogleFonts.poppins(fontSize: 13, color: Colors.black)));
+        if (isValid &&
+            !_hasTitleError &&
+            !_hasCategoryError &&
+            !_hasPriorityError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Processing Data')),
+          );
+          viewModel.addGoal(_title!, _selectedCategory!, _selectedProgress);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Please fill all fields correctly')),
+          );
+        }
+      },
+      child: message("Confirm"),
+    );
   }
 }
