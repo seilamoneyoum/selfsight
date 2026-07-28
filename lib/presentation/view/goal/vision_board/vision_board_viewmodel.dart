@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:selfsight/domain/entities/vision_board/vision_board.dart';
 import 'package:selfsight/domain/entities/vision_board/vision_board_item.dart';
 import 'package:stacked/stacked.dart';
 import 'package:image/image.dart' as image;
@@ -109,55 +108,27 @@ class VisionBoardViewModel extends BaseViewModel {
   }
 
   Future<VisionBoardItem> convertToVisionBoardItem(
-    XFile xFile, // Now takes XFile directly, not File
+    XFile xFile,
     String persistentDirectoryPath,
   ) async {
-    // 1. Generate a unique filename to prevent collisions
-    //    Using microseconds + original filename is safe
     final String uniqueFileName =
         '${DateTime.now().microsecondsSinceEpoch}_${xFile.name}';
 
-    // 2. Create the destination File in the app's Documents folder
     final File persistentFile = File(
       '$persistentDirectoryPath/$uniqueFileName',
     );
 
-    // 3. CRITICAL: Copy the temporary file to the persistent location
-    //    If the temporary file is deleted, `xFile.path` still holds the path,
-    //    but `await File(xFile.path).copy()` will fail.
-    //    Safer approach: read bytes from the XFile and write them.
     try {
       final bytes = await xFile.readAsBytes();
       await persistentFile.writeAsBytes(bytes);
     } catch (e) {
-      // Fallback: If reading from XFile fails, try copying the File path.
-      // This rarely happens, but it's safe.
       await File(xFile.path).copy(persistentFile.path);
     }
 
-    // 4. Now decode the persistent file to get its dimensions
-    final bytes = await persistentFile.readAsBytes();
-    final decodedImage = image.decodeImage(bytes);
-
-    final originalWidth = decodedImage?.width ?? 100;
-    final originalHeight = decodedImage?.height ?? 100;
-
-    const double maxSize = 150.0;
-    double scale = 1.0;
-    if (originalWidth > maxSize || originalHeight > maxSize) {
-      double scaleW = maxSize / originalWidth;
-      double scaleH = maxSize / originalHeight;
-      scale = scaleW < scaleH ? scaleW : scaleH;
-    }
-
-    final scaledWidth = originalWidth * scale;
-    final scaledHeight = originalHeight * scale;
-
-    // 5. Return the item using the NEW persistent file path
     return VisionBoardItem(
       position: Offset(100, 100),
-      size: Size(scaledWidth, scaledHeight),
-      imagePath: persistentFile.path, // <-- PERSISTENT PATH
+      size: await getScaledWidth(persistentFile),
+      imagePath: persistentFile.path,
       id: UniqueKey().toString(),
       rotation: 0,
       scale: 1,

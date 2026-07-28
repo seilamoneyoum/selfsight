@@ -28,26 +28,7 @@ class _VisionBoardViewState extends State<VisionBoardView> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Container(
-                    decoration: viewModel.isImageBackgroundSelected
-                        ? BoxDecoration(
-                            image: DecorationImage(
-                              image: FileImage(viewModel.backgroundImage!),
-                              fit: BoxFit.cover,
-                            ),
-                          )
-                        : null,
-                    color: viewModel.isImageBackgroundSelected
-                        ? null
-                        : viewModel.backgroundColor,
-                    width: MediaQuery.of(context).size.width,
-                    height: MediaQuery.of(context).size.width,
-                    child: Stack(children: showImages(viewModel)),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: <Widget>[],
-                  ),
+                  getBackgroundContainer(viewModel, context),
                   Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
@@ -60,6 +41,25 @@ class _VisionBoardViewState extends State<VisionBoardView> {
           );
         });
   }
+}
+
+Container getBackgroundContainer(
+    VisionBoardViewModel viewModel, BuildContext context) {
+  return Container(
+    decoration: viewModel.isImageBackgroundSelected
+        ? BoxDecoration(
+            image: DecorationImage(
+              image: FileImage(viewModel.backgroundImage!),
+              fit: BoxFit.cover,
+            ),
+          )
+        : null,
+    color:
+        viewModel.isImageBackgroundSelected ? null : viewModel.backgroundColor,
+    width: MediaQuery.of(context).size.width,
+    height: MediaQuery.of(context).size.width,
+    child: Stack(children: showImages(viewModel)),
+  );
 }
 
 List<Widget> showImages(VisionBoardViewModel viewModel) {

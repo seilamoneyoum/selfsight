@@ -4,7 +4,6 @@ import 'package:selfsight/presentation/view/goal/goal_form.dart';
 import 'package:selfsight/presentation/view/goal/goal_viewmodel.dart';
 import 'package:selfsight/presentation/view/general/title_interface.dart';
 import 'package:stacked/stacked.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class GoalView extends StatefulWidget {
   const GoalView({super.key});

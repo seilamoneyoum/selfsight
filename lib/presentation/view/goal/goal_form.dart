@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:selfsight/domain/entities/goal/category.dart';
 import 'package:selfsight/domain/entities/goal/priority.dart';
-import 'package:selfsight/presentation/view/general/text.dart';
+import 'package:selfsight/domain/entities/goal/progress.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:selfsight/presentation/view/general/input_decoration.dart';
-import 'package:selfsight/presentation/view/general/title_field.dart';
 import 'package:selfsight/presentation/view/goal/goal_viewmodel.dart';
 
 class GoalForm extends StatefulWidget {
@@ -21,37 +20,78 @@ class GoalForm extends StatefulWidget {
 
 class GoalFormState extends State<GoalForm> {
   final _formKey = GlobalKey<FormState>();
-  Category? selectedCategory;
-  Priority? selectedPriority;
-  DateTime? selectedStartDate;
-  bool isStartDateToggleOn = false;
-  DateTime? selectedEndDate;
-  bool isEndDateToggleOn = false;
-  bool isAccomplished = false;
+  String? _title;
+  Category? _selectedCategory;
+  late Progress __selectedProgress;
+
+  bool _isStartDateToggleOn = false;
+  bool _isEndDateToggleOn = false;
+
+  bool _hasTitleError = false;
+  bool _hasCategoryError = false;
+  bool _hasPriorityError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    __selectedProgress = Progress(isAccomplished: false);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = widget.viewModel;
+
     return Form(
       key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           visionBoardButton(_formKey, context),
+          SizedBox(height: 12),
           titleField(),
+          if (_hasTitleError == true) errorMessage("Title is needed"),
           SizedBox(height: 12),
           categoryDropdown(),
+          if (_hasCategoryError == true)
+            errorMessage("Category needs to be selected"),
           SizedBox(height: 12),
-          dateField("Start date", true),
+          dateField("Start date", true, __selectedProgress),
           SizedBox(height: 12),
-          dateField("End date", false),
+          dateField("End date", false, __selectedProgress),
           SizedBox(height: 12),
           isAccomplishedCheckbox(),
           SizedBox(height: 12),
-          priorityDropdown(),
+          priorityDropdown(__selectedProgress),
+          if (_hasPriorityError == true)
+            errorMessage("Priority needs to be selected"),
           SizedBox(height: 30),
-          confirmButton(_formKey, context)
+          confirmButton(_formKey, context, viewModel, _title, _selectedCategory,
+              __selectedProgress)
         ],
       ),
+    );
+  }
+
+  // ======================== Sous-méthodes ====================================
+
+  Text errorMessage(String text) {
+    return Text(
+      text,
+      style: GoogleFonts.poppins(
+        fontSize: 10,
+        color: Colors.red,
+      ),
+    );
+  }
+
+  TextFormField titleField() {
+    return TextFormField(
+      decoration: inputDecoration("Title"),
+      initialValue: _title,
+      onChanged: (newTitle) {
+        _title = newTitle;
+      },
+      style: GoogleFonts.poppins(fontSize: 12),
     );
   }
 
@@ -97,7 +137,7 @@ class GoalFormState extends State<GoalForm> {
   DropdownButtonFormField<Category> categoryDropdown() {
     return DropdownButtonFormField<Category>(
       decoration: inputDecoration("Category"),
-      initialValue: selectedCategory,
+      initialValue: _selectedCategory,
       isExpanded: true,
       items: buildDropdownItems<Category>(
         values: Category.values,
@@ -106,7 +146,7 @@ class GoalFormState extends State<GoalForm> {
       ),
       onChanged: (Category? newValue) {
         setState(() {
-          selectedCategory = newValue;
+          _selectedCategory = newValue;
         });
       },
     );
@@ -124,17 +164,18 @@ class GoalFormState extends State<GoalForm> {
         ),
         Checkbox(
             checkColor: Colors.white,
-            value: isAccomplished,
+            value: __selectedProgress.isAccomplished,
             onChanged: (bool? value) {
               setState(() {
-                isAccomplished = value!;
+                __selectedProgress.isAccomplished = value!;
               });
             })
       ],
     );
   }
 
-  SizedBox dateField(String label, bool isStartDateBtn) {
+  SizedBox dateField(
+      String label, bool isStartDateBtn, Progress selectedProgress) {
     return SizedBox(
         height: 30,
         child: Row(
@@ -155,38 +196,42 @@ class GoalFormState extends State<GoalForm> {
                   scale: 0.8,
                   child: CupertinoSwitch(
                     value: isStartDateBtn
-                        ? isStartDateToggleOn
-                        : isEndDateToggleOn,
+                        ? _isStartDateToggleOn
+                        : _isEndDateToggleOn,
                     activeTrackColor: Colors.black, // track color when enabled
                     onChanged: (val) {
                       setState(() {
                         if (isStartDateBtn) {
-                          isStartDateToggleOn = val;
+                          _isStartDateToggleOn = val;
                         } else {
-                          isEndDateToggleOn = val;
+                          _isEndDateToggleOn = val;
                         }
                       });
                     },
                   )),
             ),
-            if (isStartDateBtn ? isStartDateToggleOn : isEndDateToggleOn)
-              toggleDateButton(isStartDateBtn)
+            if (isStartDateBtn ? _isStartDateToggleOn : _isEndDateToggleOn)
+              toggleDateButton(isStartDateBtn, selectedProgress)
           ],
         ));
   }
 
-  Widget toggleDateButton(bool isStartDateBtn) {
+  Widget toggleDateButton(bool isStartDateBtn, Progress selectedProgress) {
     return ElevatedButton(
       onPressed: isStartDateBtn
-          ? (isStartDateToggleOn ? () => selectDate(context, true) : null)
-          : (isEndDateToggleOn ? () => selectDate(context, false) : null),
+          ? (_isStartDateToggleOn
+              ? () => selectDate(context, true, selectedProgress)
+              : null)
+          : (_isEndDateToggleOn
+              ? () => selectDate(context, false, selectedProgress)
+              : null),
       child: Text(
         (isStartDateBtn
-            ? (selectedStartDate != null
-                ? selectedStartDate.toString().substring(0, 10)
+            ? (__selectedProgress.startDate != null
+                ? __selectedProgress.startDate.toString().substring(0, 10)
                 : DateTime.now().toString().substring(0, 10))
-            : (selectedEndDate != null
-                ? selectedEndDate.toString().substring(0, 10)
+            : (__selectedProgress.endDate != null
+                ? __selectedProgress.endDate.toString().substring(0, 10)
                 : DateTime.now().toString().substring(0, 10))),
         style: GoogleFonts.poppins(
           fontSize: 13,
@@ -229,29 +274,31 @@ class GoalFormState extends State<GoalForm> {
   void updateSelectedDate(DateTime picked, bool isStartDateBtn) {
     setState(() {
       if (isStartDateBtn) {
-        selectedStartDate = picked;
+        __selectedProgress.startDate = picked;
       } else {
-        selectedEndDate = picked;
+        __selectedProgress.endDate = picked;
       }
     });
   }
 
-  Future<void> selectDate(BuildContext context, bool isStartDateBtn) async {
+  Future<void> selectDate(BuildContext context, bool isStartDateBtn,
+      Progress selectedProgress) async {
     final DateTime? picked = await pickDate(context);
 
     if (picked != null) {
-      if (isStartDateBtn && picked != selectedStartDate) {
+      if (isStartDateBtn && picked != selectedProgress.startDate) {
         updateSelectedDate(picked, true);
-      } else if (!isStartDateBtn && picked != selectedEndDate) {
+      } else if (!isStartDateBtn && picked != selectedProgress.endDate) {
         updateSelectedDate(picked, false);
       }
     }
   }
 
-  DropdownButtonFormField<Priority> priorityDropdown() {
+  DropdownButtonFormField<Priority> priorityDropdown(
+      Progress selectedProgress) {
     return DropdownButtonFormField<Priority>(
       decoration: inputDecoration("Priority"),
-      initialValue: selectedPriority,
+      initialValue: selectedProgress.priority,
       isExpanded: true,
       items: buildDropdownItems<Priority>(
           values: Priority.values,
@@ -259,20 +306,50 @@ class GoalFormState extends State<GoalForm> {
           getLabel: (p) => p.level),
       onChanged: (Priority? newValue) {
         setState(() {
-          selectedPriority = newValue;
+          selectedProgress.priority = newValue;
         });
       },
     );
   }
 
   ElevatedButton confirmButton(
-      GlobalKey<FormState> formKey, BuildContext context) {
+      GlobalKey<FormState> formKey,
+      BuildContext context,
+      GoalViewModel viewModel,
+      String? title,
+      Category? selectedCategory,
+      Progress selectedProgress) {
     return ElevatedButton(
         onPressed: () {
           if (formKey.currentState!.validate()) {
+            formKey.currentState!.save();
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Processing Data')),
             );
+
+            try {
+              viewModel.addGoal(title!, selectedCategory!, selectedProgress);
+            } catch ($e) {
+              if (title == null) {
+                _hasTitleError = true;
+              } else {
+                _hasTitleError = false;
+              }
+
+              if (selectedCategory == null) {
+                _hasCategoryError = true;
+              } else {
+                _hasCategoryError = false;
+              }
+
+              if (selectedProgress.priority == null) {
+                _hasPriorityError = true;
+              } else {
+                _hasPriorityError = false;
+              }
+
+              viewModel.notifyListeners();
+            }
           }
         },
         child: Text("Confirm",

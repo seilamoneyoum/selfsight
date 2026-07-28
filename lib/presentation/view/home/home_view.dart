@@ -1,6 +1,8 @@
+// home_view.dart
 import 'package:flutter/material.dart';
 import 'package:selfsight/presentation/view/home/home_viewmodel.dart';
 import 'package:stacked/stacked.dart';
+import 'package:selfsight/domain/entities/goal/category.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -14,41 +16,68 @@ class _HomeViewState extends State<HomeView> {
   Widget build(BuildContext context) {
     return ViewModelBuilder<HomeViewModel>.reactive(
       viewModelBuilder: () => HomeViewModel(),
+      onViewModelReady: (viewModel) => viewModel.loadGoals(),
       builder: (context, viewModel, child) => Scaffold(
-        body: GridView.count(
-          crossAxisCount: 2,
-          children: List.generate(viewModel.nbMainGoal, (index) {
-            return Container(
-              margin: const EdgeInsets.all(8),
-              color: Colors.blue,
-              child: Center(child: Text('Item $index')),
-            );
-          }),
-        ),
+        body: viewModel.isBusy
+            ? const Center(child: CircularProgressIndicator())
+            : viewModel.goals.isEmpty
+                ? const Center(child: Text('No goals yet'))
+                : GridView.count(
+                    crossAxisCount: 2,
+                    children: viewModel.goals.map((goal) {
+                      return GestureDetector(
+                        onTap: () => viewModel.navigateToSpecificGoal(goal.id),
+                        child: Container(
+                          margin: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade100,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                goal.category?.icon ?? Icons.category,
+                                size: 40,
+                                color: Colors.blue.shade700,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                goal.title,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                goal.progress.isAccomplished
+                                    ? 'Completed'
+                                    : 'In progress',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: goal.progress.isAccomplished
+                                      ? Colors.green
+                                      : Colors.orange,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
         floatingActionButton: FloatingActionButton(
-          onPressed: viewModel
-              .navigateToMainGoalView, //onPressed: viewModel.addMainGoal
+          onPressed: () async {
+            await viewModel.navigateToMainGoalView();
+            viewModel.loadGoals();
+          },
+          backgroundColor: Colors.black,
+          foregroundColor: Colors.white,
           child: const Icon(Icons.add),
         ),
       ),
     );
   }
 }
-
-
-      /* appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text("Goal Garden"),
-        actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.message,
-              color: Colors.white,
-            ),
-            onPressed: () {
-              // do something
-            },
-          )
-        ],
-      ),
-      body: const Center(child: Text('Test')),*/
