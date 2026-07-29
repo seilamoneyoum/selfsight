@@ -11,6 +11,21 @@ class GoalViewModel extends BaseViewModel {
   final _navigationService = locator<NavigationService>();
   final _goalService = locator<GoalService>();
 
+  final String? goalId;
+  GoalViewModel({this.goalId});
+
+  Goal? _goal;
+  Goal? get goal => _goal;
+
+  Future<void> loadGoal() async {
+    if (goalId != null) {
+      setBusy(true);
+      _goal = await _goalService.getGoalById(goalId!);
+      setBusy(false);
+      notifyListeners();
+    }
+  }
+
   /// Ajouter un nouveau objectif
   /// - Sans tâches et vision board définis pour le moment [À modifier plus tard]
   Future<void> addGoal(

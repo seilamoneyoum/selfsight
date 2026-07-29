@@ -56,11 +56,9 @@ class StackedRouter extends _i1.RouterBase {
       );
     },
     _i3.GoalView: (data) {
-      final args = data.getArgs<GoalViewArguments>(
-        orElse: () => const GoalViewArguments(),
-      );
+      final args = data.getArgs<GoalViewArguments>(nullOk: false);
       return _i5.MaterialPageRoute<dynamic>(
-        builder: (context) => _i3.GoalView(key: args.key),
+        builder: (context) => _i3.GoalView(key: args.key, goalId: args.goalId),
         settings: data,
       );
     },
@@ -105,24 +103,29 @@ class HomeViewArguments {
 }
 
 class GoalViewArguments {
-  const GoalViewArguments({this.key});
+  const GoalViewArguments({
+    this.key,
+    required this.goalId,
+  });
 
   final _i5.Key? key;
 
+  final String goalId;
+
   @override
   String toString() {
-    return '{"key": "$key"}';
+    return '{"key": "$key", "goalId": "$goalId"}';
   }
 
   @override
   bool operator ==(covariant GoalViewArguments other) {
     if (identical(this, other)) return true;
-    return other.key == key;
+    return other.key == key && other.goalId == goalId;
   }
 
   @override
   int get hashCode {
-    return key.hashCode;
+    return key.hashCode ^ goalId.hashCode;
   }
 }
 
@@ -167,6 +170,7 @@ extension NavigatorStateExtension on _i6.NavigationService {
 
   Future<dynamic> navigateToGoalView({
     _i5.Key? key,
+    required String goalId,
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
@@ -174,7 +178,7 @@ extension NavigatorStateExtension on _i6.NavigationService {
         transition,
   }) async {
     return navigateTo<dynamic>(Routes.goalView,
-        arguments: GoalViewArguments(key: key),
+        arguments: GoalViewArguments(key: key, goalId: goalId),
         id: routerId,
         preventDuplicates: preventDuplicates,
         parameters: parameters,
@@ -215,6 +219,7 @@ extension NavigatorStateExtension on _i6.NavigationService {
 
   Future<dynamic> replaceWithGoalView({
     _i5.Key? key,
+    required String goalId,
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
@@ -222,7 +227,7 @@ extension NavigatorStateExtension on _i6.NavigationService {
         transition,
   }) async {
     return replaceWith<dynamic>(Routes.goalView,
-        arguments: GoalViewArguments(key: key),
+        arguments: GoalViewArguments(key: key, goalId: goalId),
         id: routerId,
         preventDuplicates: preventDuplicates,
         parameters: parameters,

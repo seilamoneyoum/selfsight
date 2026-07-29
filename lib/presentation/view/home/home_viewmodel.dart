@@ -18,7 +18,7 @@ class HomeViewModel extends BaseViewModel {
   /// Charger les objectifs et les rendre visibles à la page d'accueil
   Future<void> loadGoals() async {
     setBusy(true);
-    _goals = await _goalService.loadGoals();
+    _goals = await _goalService.getGoals();
     setBusy(false);
     notifyListeners();
   }
@@ -30,6 +30,7 @@ class HomeViewModel extends BaseViewModel {
 
   /// Accès au objectif existant
   Future<void> navigateToSpecificGoal(String goalId) async {
-    _navigationService.navigateTo(Routes.goalView, arguments: goalId);
+    _navigationService.navigateTo(Routes.goalView,
+        arguments: GoalViewArguments(goalId: goalId));
   }
 }

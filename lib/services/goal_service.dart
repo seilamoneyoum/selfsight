@@ -40,7 +40,7 @@ class GoalService {
   /// et le remplace par une nouvelle version.
   Future<void> saveGoal(Goal goal) async {
     final preferences = await SharedPreferences.getInstance();
-    List<Goal> currentGoals = await loadGoals();
+    List<Goal> currentGoals = await getGoals();
 
     currentGoals.removeWhere((g) => g.id == goal.id);
     currentGoals.add(goal);
@@ -52,7 +52,7 @@ class GoalService {
   }
 
   // Charger tous les objectifs sauvegardés
-  Future<List<Goal>> loadGoals() async {
+  Future<List<Goal>> getGoals() async {
     final preferences = await SharedPreferences.getInstance();
     List<String>? jsonList = preferences.getStringList(_goalsKey);
 
@@ -64,10 +64,17 @@ class GoalService {
     }).toList();
   }
 
+// Obtenir un objectif via ID
+  Future<Goal> getGoalById(String id) async {
+    List<Goal> allGoals = await getGoals();
+
+    return allGoals.firstWhere((g) => g.id == id);
+  }
+
   // Effacer un objectif via ID (et, par extension, le fichier image de vision board
   Future<void> deleteGoal(String id) async {
     final preferences = await SharedPreferences.getInstance();
-    List<Goal> currentGoals = await loadGoals();
+    List<Goal> currentGoals = await getGoals();
 
     final goalToDelete = currentGoals.firstWhere((g) => g.id == id);
     await deleteImageFile(goalToDelete.visionBoardPath);
