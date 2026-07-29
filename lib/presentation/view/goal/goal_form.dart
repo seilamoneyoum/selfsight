@@ -20,7 +20,8 @@ class GoalForm extends StatefulWidget {
 
 class GoalFormState extends State<GoalForm> {
   final _formKey = GlobalKey<FormState>();
-  String? _title;
+  final TextEditingController _titleController = TextEditingController();
+
   Category? _selectedCategory;
   late Progress _selectedProgress;
 
@@ -39,8 +40,33 @@ class GoalFormState extends State<GoalForm> {
   }
 
   @override
+  void didUpdateWidget(covariant GoalForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _updateFieldsFromGoal();
+  }
+
+  void _updateFieldsFromGoal() {
+    final goal = widget.viewModel.goal;
+    if (goal != null) {
+      setState(() {
+        _titleController.text = goal.title;
+        _selectedCategory = goal.category;
+        _selectedProgress = goal.progress;
+        _isStartDateToggleOn = goal.progress.startDate != null;
+        _isEndDateToggleOn = goal.progress.endDate != null;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final viewModel = widget.viewModel;
+    //_updateFieldsFromGoal();
 
     return Form(
       key: _formKey,
@@ -48,25 +74,23 @@ class GoalFormState extends State<GoalForm> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           titleField(),
-          if (_hasTitleError == true) errorMessage("Title is needed"),
-          SizedBox(height: 12),
+          if (_hasTitleError) errorMessage("Title is needed"),
+          const SizedBox(height: 12),
           categoryDropdown(),
-          if (_hasCategoryError == true)
-            errorMessage("Category needs to be selected"),
-          SizedBox(height: 12),
+          if (_hasCategoryError) errorMessage("Category needs to be selected"),
+          const SizedBox(height: 12),
           dateField("Start date", true, _selectedProgress),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           dateField("End date", false, _selectedProgress),
-          if (_hasDateError == true)
+          if (_hasDateError)
             errorMessage("End date needs to be after start date"),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           isAccomplishedCheckbox(),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           priorityDropdown(_selectedProgress),
-          if (_hasPriorityError == true)
-            errorMessage("Priority needs to be selected"),
-          SizedBox(height: 30),
-          confirmButton(_formKey, context, viewModel)
+          if (_hasPriorityError) errorMessage("Priority needs to be selected"),
+          const SizedBox(height: 30),
+          confirmButton(_formKey, context, widget.viewModel),
         ],
       ),
     );
@@ -86,11 +110,8 @@ class GoalFormState extends State<GoalForm> {
 
   TextFormField titleField() {
     return TextFormField(
+      controller: _titleController,
       decoration: labelInput("Title"),
-      initialValue: _title,
-      onChanged: (newTitle) {
-        _title = newTitle;
-      },
       style: GoogleFonts.poppins(fontSize: 12),
     );
   }
@@ -167,7 +188,7 @@ class GoalFormState extends State<GoalForm> {
                     value: isStartDateBtn
                         ? _isStartDateToggleOn
                         : _isEndDateToggleOn,
-                    activeTrackColor: Colors.black, // track color when enabled
+                    activeTrackColor: Colors.black,
                     onChanged: (val) {
                       setState(() {
                         if (isStartDateBtn) {
@@ -263,9 +284,10 @@ class GoalFormState extends State<GoalForm> {
       initialValue: selectedProgress.priority,
       isExpanded: true,
       items: buildDropdownItems<Priority>(
-          values: Priority.values,
-          getIcon: (p) => p.icon,
-          getLabel: (p) => p.level),
+        values: Priority.values,
+        getIcon: (p) => p.icon,
+        getLabel: (p) => p.level,
+      ),
       onChanged: (Priority? newValue) {
         setState(() {
           selectedProgress.priority = newValue;
@@ -287,7 +309,7 @@ class GoalFormState extends State<GoalForm> {
         }
 
         setState(() {
-          _hasTitleError = (_title == null || _title == "");
+          _hasTitleError = (_titleController.text == "");
           _hasCategoryError = (_selectedCategory == null);
           _hasPriorityError = (_selectedProgress.priority == null);
           if (_selectedProgress.endDate != null &&
@@ -307,14 +329,15 @@ class GoalFormState extends State<GoalForm> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Processing Data')),
           );
-          viewModel.addGoal(_title!, _selectedCategory!, _selectedProgress);
+          viewModel.addGoal(
+              _titleController.text, _selectedCategory!, _selectedProgress);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Please fill all fields correctly')),
           );
         }
       },
-      child: message("Confirm"),
+      child: message(viewModel.goalId == null ? "Confirm" : "Save"),
     );
   }
 }
