@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:selfsight/domain/entities/vision_board/vision_board_item.dart';
-import 'package:selfsight/presentation/app/app.dart';
 import 'package:selfsight/presentation/app/app.router.dart';
 import 'package:selfsight/presentation/view/goal/goal_form.dart';
 import 'package:selfsight/presentation/view/goal/goal_viewmodel.dart';

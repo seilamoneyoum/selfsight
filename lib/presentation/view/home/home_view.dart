@@ -1,6 +1,5 @@
 // home_view.dart
 import 'package:flutter/material.dart';
-import 'package:selfsight/presentation/app/app.dart';
 import 'package:selfsight/presentation/view/home/home_viewmodel.dart';
 import 'package:stacked/stacked.dart';
 import 'package:selfsight/domain/entities/goal/category.dart';

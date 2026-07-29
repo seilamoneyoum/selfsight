@@ -30,6 +30,7 @@ class GoalFormState extends State<GoalForm> {
   bool _hasTitleError = false;
   bool _hasCategoryError = false;
   bool _hasPriorityError = false;
+  bool _hasDateError = false;
 
   @override
   void initState() {
@@ -58,6 +59,8 @@ class GoalFormState extends State<GoalForm> {
           dateField("Start date", true, _selectedProgress),
           SizedBox(height: 12),
           dateField("End date", false, _selectedProgress),
+          if (_hasDateError == true)
+            errorMessage("End date needs to be after start date"),
           SizedBox(height: 12),
           isAccomplishedCheckbox(),
           SizedBox(height: 12),
@@ -300,13 +303,20 @@ class GoalFormState extends State<GoalForm> {
           _hasTitleError = (_title == null || _title == "");
           _hasCategoryError = (_selectedCategory == null);
           _hasPriorityError = (_selectedProgress.priority == null);
+          if (_selectedProgress.endDate != null &&
+              _selectedProgress.startDate != null) {
+            _hasDateError = (_selectedProgress.endDate
+                ?.isBefore(_selectedProgress.startDate!))!;
+          }
+
           viewModel.notifyListeners();
         });
 
         if (isValid &&
             !_hasTitleError &&
             !_hasCategoryError &&
-            !_hasPriorityError) {
+            !_hasPriorityError &&
+            !_hasDateError) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Processing Data')),
           );
