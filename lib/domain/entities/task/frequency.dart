@@ -12,10 +12,7 @@ class Frequency {
 
   Frequency({this.unit, this.days, this.period, this.time});
   Map<String, dynamic> toJson() => {
-        'unit': unit
-            ?.toString()
-            .split('.')
-            .last, // Converts Unit.minutes -> 'minutes'
+        'unit': unit?.toString().split('.').last,
         'days': days?.map((e) => e.toString().split('.').last).toList(),
         'period': period?.toString().split('.').last,
         'time': time,

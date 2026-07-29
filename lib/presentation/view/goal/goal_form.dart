@@ -47,8 +47,6 @@ class GoalFormState extends State<GoalForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          visionBoardButton(_formKey, context),
-          SizedBox(height: 12),
           titleField(),
           if (_hasTitleError == true) errorMessage("Title is needed"),
           SizedBox(height: 12),
@@ -95,17 +93,6 @@ class GoalFormState extends State<GoalForm> {
       },
       style: GoogleFonts.poppins(fontSize: 12),
     );
-  }
-
-  ElevatedButton visionBoardButton(
-      GlobalKey<FormState> formKey, BuildContext context) {
-    return ElevatedButton(
-        onPressed: () {
-          if (formKey.currentState!.validate()) {
-            widget.viewModel.navigateToVisionBoardView();
-          }
-        },
-        child: message("Set Vision Board"));
   }
 
   List<DropdownMenuItem<T>> buildDropdownItems<T>({

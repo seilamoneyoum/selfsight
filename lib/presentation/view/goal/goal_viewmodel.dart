@@ -47,8 +47,4 @@ class GoalViewModel extends BaseViewModel {
   void navigateToHomeGoalView() {
     _navigationService.navigateTo(Routes.homeView);
   }
-
-  void navigateToVisionBoardView() {
-    _navigationService.navigateTo(Routes.visionBoardView);
-  }
 }

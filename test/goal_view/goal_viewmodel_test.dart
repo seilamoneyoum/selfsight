@@ -97,13 +97,5 @@ void main() {
       viewModel.navigateToHomeGoalView();
       verify(mockNavigationService.navigateTo(Routes.homeView)).called(1);
     });
-
-    test(
-        'navigateToVisionBoardView appelle navigation service avec la route de visionBoardView',
-        () {
-      viewModel.navigateToVisionBoardView();
-      verify(mockNavigationService.navigateTo(Routes.visionBoardView))
-          .called(1);
-    });
   });
 }
