@@ -25,7 +25,8 @@ class HomeViewModel extends BaseViewModel {
 
   /// Création d'un nouveau objectif
   Future<void> navigateToMainGoalView() async {
-    _navigationService.navigateTo(Routes.goalView);
+    _navigationService.navigateTo(Routes.goalView,
+        arguments: GoalViewArguments(goalId: null));
   }
 
   /// Accès au objectif existant

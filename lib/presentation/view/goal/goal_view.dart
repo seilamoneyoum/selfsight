@@ -8,10 +8,10 @@ import 'package:selfsight/presentation/view/templates.dart';
 import 'package:stacked/stacked.dart';
 
 class GoalView extends StatefulWidget {
-  final String goalId;
+  final String? goalId;
   const GoalView({
     Key? key,
-    required this.goalId,
+    this.goalId,
   }) : super(key: key);
 
   @override

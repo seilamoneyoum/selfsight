@@ -56,7 +56,9 @@ class StackedRouter extends _i1.RouterBase {
       );
     },
     _i3.GoalView: (data) {
-      final args = data.getArgs<GoalViewArguments>(nullOk: false);
+      final args = data.getArgs<GoalViewArguments>(
+        orElse: () => const GoalViewArguments(),
+      );
       return _i5.MaterialPageRoute<dynamic>(
         builder: (context) => _i3.GoalView(key: args.key, goalId: args.goalId),
         settings: data,
@@ -105,12 +107,12 @@ class HomeViewArguments {
 class GoalViewArguments {
   const GoalViewArguments({
     this.key,
-    required this.goalId,
+    this.goalId,
   });
 
   final _i5.Key? key;
 
-  final String goalId;
+  final String? goalId;
 
   @override
   String toString() {
@@ -170,7 +172,7 @@ extension NavigatorStateExtension on _i6.NavigationService {
 
   Future<dynamic> navigateToGoalView({
     _i5.Key? key,
-    required String goalId,
+    String? goalId,
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
@@ -219,7 +221,7 @@ extension NavigatorStateExtension on _i6.NavigationService {
 
   Future<dynamic> replaceWithGoalView({
     _i5.Key? key,
-    required String goalId,
+    String? goalId,
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
