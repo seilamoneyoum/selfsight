@@ -66,8 +66,6 @@ class GoalFormState extends State<GoalForm> {
 
   @override
   Widget build(BuildContext context) {
-    //_updateFieldsFromGoal();
-
     return Form(
       key: _formKey,
       child: Column(
@@ -90,7 +88,12 @@ class GoalFormState extends State<GoalForm> {
           priorityDropdown(_selectedProgress),
           if (_hasPriorityError) errorMessage("Priority needs to be selected"),
           const SizedBox(height: 30),
-          confirmButton(_formKey, context, widget.viewModel),
+          Row(
+            children: [
+              confirmButton(_formKey, context, widget.viewModel),
+              if (widget.viewModel.goal != null) deleteButton(widget.viewModel)
+            ],
+          )
         ],
       ),
     );
@@ -338,6 +341,39 @@ class GoalFormState extends State<GoalForm> {
         }
       },
       child: message(viewModel.goalId == null ? "Confirm" : "Save"),
+    );
+  }
+
+  ElevatedButton deleteButton(GoalViewModel viewModel) {
+    return ElevatedButton(
+      onPressed: () {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Confirm Action'),
+              content: const Text(
+                  'Are you sure you want to delete the goal? Once you delete this goal, there is no way of retrieving it.'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    viewModel.deleteGoal();
+                  },
+                  child: const Text('Confirm'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+      child: message("Delete"),
     );
   }
 }

@@ -17,6 +17,7 @@ class GoalViewModel extends BaseViewModel {
   Goal? _goal;
   Goal? get goal => _goal;
 
+  /// Charger l'objectif existant sur l'interface
   Future<void> loadGoal() async {
     if (goalId != null) {
       setBusy(true);
@@ -41,6 +42,12 @@ class GoalViewModel extends BaseViewModel {
     );
 
     await _goalService.saveGoal(newGoal);
+  }
+
+  /// Effacer l'objectif existant (et retourner à la page d'accueil)
+  Future<void> deleteGoal() async {
+    await _goalService.deleteGoal(goalId!);
+    navigateToHomeGoalView();
   }
 
   // Navigation
