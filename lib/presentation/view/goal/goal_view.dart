@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:selfsight/presentation/app/app.router.dart';
 import 'package:selfsight/presentation/view/goal/goal_form.dart';
 import 'package:selfsight/presentation/view/goal/goal_viewmodel.dart';
+import 'package:selfsight/presentation/view/goal/task/task_viewmodel.dart';
+import 'package:selfsight/presentation/view/goal/task/task_widget.dart';
 import 'package:selfsight/presentation/view/goal/vision_board/vision_board_viewmodel.dart';
 import 'package:selfsight/presentation/view/goal/vision_board/vision_board_widget.dart';
 import 'package:selfsight/presentation/view/templates.dart';
@@ -69,21 +71,33 @@ class _GoalViewState extends State<GoalView>
           ),
           body: PageView(
             controller: _pageController,
-            physics: const NeverScrollableScrollPhysics(), // ❌ disables swipe
+            physics: const NeverScrollableScrollPhysics(),
             children: [
               goalFormContainer(viewModel as GoalViewModel),
-              ViewModelBuilder.reactive(
-                viewModelBuilder: () => VisionBoardViewModel(),
-                builder: (context, visionBoardVM, child) => VisionBoardWidget(
-                    viewModel: visionBoardVM as VisionBoardViewModel),
-              ),
-              const Center(child: Icon(Icons.directions_bike, size: 64)),
+              visionBoardContainer(),
+              tasksHandlerContainer(),
             ],
           ),
         );
       },
     );
   }
+}
+
+ViewModelBuilder<TaskViewModel> tasksHandlerContainer() {
+  return ViewModelBuilder.reactive(
+    viewModelBuilder: () => TaskViewModel(),
+    builder: (context, visionBoardVM, child) =>
+        TaskWidget(viewModel: visionBoardVM),
+  );
+}
+
+ViewModelBuilder<VisionBoardViewModel> visionBoardContainer() {
+  return ViewModelBuilder.reactive(
+    viewModelBuilder: () => VisionBoardViewModel(),
+    builder: (context, visionBoardVM, child) =>
+        VisionBoardWidget(viewModel: visionBoardVM),
+  );
 }
 
 Container goalFormContainer(GoalViewModel viewModel) {

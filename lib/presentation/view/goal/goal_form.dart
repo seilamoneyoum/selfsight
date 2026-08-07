@@ -89,6 +89,7 @@ class GoalFormState extends State<GoalForm> {
           if (_hasPriorityError) errorMessage("Priority needs to be selected"),
           const SizedBox(height: 30),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               confirmButton(_formKey, context, widget.viewModel),
               if (widget.viewModel.goal != null) deleteButton(widget.viewModel)
@@ -332,8 +333,14 @@ class GoalFormState extends State<GoalForm> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Processing Data')),
           );
-          viewModel.addGoal(
-              _titleController.text, _selectedCategory!, _selectedProgress);
+
+          if (viewModel.goal == null) {
+            viewModel.addGoal(
+                _titleController.text, _selectedCategory!, _selectedProgress);
+          } else {
+            viewModel.updateGoal(
+                _titleController.text, _selectedCategory!, _selectedProgress);
+          }
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Please fill all fields correctly')),

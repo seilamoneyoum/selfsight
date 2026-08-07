@@ -35,7 +35,7 @@ class GoalService {
     }
   }
 
-  /// Sauvegarder un objectif
+  /// Sauvegarder un objectif (nouveau ou existant)
   /// Par le principe d'un mise à jour, on enlève l'ancien version,
   /// et le remplace par une nouvelle version.
   Future<void> saveGoal(Goal goal) async {
