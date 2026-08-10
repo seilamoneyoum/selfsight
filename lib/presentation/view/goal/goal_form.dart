@@ -20,10 +20,10 @@ class GoalForm extends StatefulWidget {
 
 class GoalFormState extends State<GoalForm> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController titleController = TextEditingController();
 
-  Category? _selectedCategory;
-  late Progress _selectedProgress;
+  Category? selectedCategory;
+  late Progress selectedProgress;
 
   bool _isStartDateToggleOn = false;
   bool _isEndDateToggleOn = false;
@@ -36,7 +36,9 @@ class GoalFormState extends State<GoalForm> {
   @override
   void initState() {
     super.initState();
-    _selectedProgress = Progress(isAccomplished: false);
+    selectedProgress = Progress(isAccomplished: false);
+    // Prendre en compte le goal déjà chargé
+    _updateFieldsFromGoal();
   }
 
   @override
@@ -49,9 +51,9 @@ class GoalFormState extends State<GoalForm> {
     final goal = widget.viewModel.goal;
     if (goal != null) {
       setState(() {
-        _titleController.text = goal.title;
-        _selectedCategory = goal.category;
-        _selectedProgress = goal.progress;
+        titleController.text = goal.title;
+        selectedCategory = goal.category;
+        selectedProgress = goal.progress;
         _isStartDateToggleOn = goal.progress.startDate != null;
         _isEndDateToggleOn = goal.progress.endDate != null;
       });
@@ -60,7 +62,7 @@ class GoalFormState extends State<GoalForm> {
 
   @override
   void dispose() {
-    _titleController.dispose();
+    titleController.dispose();
     super.dispose();
   }
 
@@ -77,15 +79,15 @@ class GoalFormState extends State<GoalForm> {
           categoryDropdown(),
           if (_hasCategoryError) errorMessage("Category needs to be selected"),
           const SizedBox(height: 12),
-          dateField("Start date", true, _selectedProgress),
+          dateField("Start date", true, selectedProgress),
           const SizedBox(height: 12),
-          dateField("End date", false, _selectedProgress),
+          dateField("End date", false, selectedProgress),
           if (_hasDateError)
             errorMessage("End date needs to be after start date"),
           const SizedBox(height: 12),
           isAccomplishedCheckbox(),
           const SizedBox(height: 12),
-          priorityDropdown(_selectedProgress),
+          priorityDropdown(selectedProgress),
           if (_hasPriorityError) errorMessage("Priority needs to be selected"),
           const SizedBox(height: 30),
           Row(
@@ -114,7 +116,7 @@ class GoalFormState extends State<GoalForm> {
 
   TextFormField titleField() {
     return TextFormField(
-      controller: _titleController,
+      controller: titleController,
       decoration: labelInput("Title"),
       style: GoogleFonts.poppins(fontSize: 12),
     );
@@ -145,7 +147,7 @@ class GoalFormState extends State<GoalForm> {
   DropdownButtonFormField<Category> categoryDropdown() {
     return DropdownButtonFormField<Category>(
       decoration: labelInput("Category"),
-      initialValue: _selectedCategory,
+      initialValue: selectedCategory,
       isExpanded: true,
       items: buildDropdownItems<Category>(
         values: Category.values,
@@ -154,7 +156,7 @@ class GoalFormState extends State<GoalForm> {
       ),
       onChanged: (Category? newValue) {
         setState(() {
-          _selectedCategory = newValue;
+          selectedCategory = newValue;
         });
       },
     );
@@ -166,10 +168,10 @@ class GoalFormState extends State<GoalForm> {
         message("Is accomplished?"),
         Checkbox(
             checkColor: Colors.white,
-            value: _selectedProgress.isAccomplished,
+            value: selectedProgress.isAccomplished,
             onChanged: (bool? value) {
               setState(() {
-                _selectedProgress.isAccomplished = value!;
+                selectedProgress.isAccomplished = value!;
               });
             })
       ],
@@ -220,11 +222,11 @@ class GoalFormState extends State<GoalForm> {
                 ? () => selectDate(context, false, selectedProgress)
                 : null),
         child: message(isStartDateBtn
-            ? (_selectedProgress.startDate != null
-                ? _selectedProgress.startDate.toString().substring(0, 10)
+            ? (selectedProgress.startDate != null
+                ? selectedProgress.startDate.toString().substring(0, 10)
                 : DateTime.now().toString().substring(0, 10))
-            : (_selectedProgress.endDate != null
-                ? _selectedProgress.endDate.toString().substring(0, 10)
+            : (selectedProgress.endDate != null
+                ? selectedProgress.endDate.toString().substring(0, 10)
                 : DateTime.now().toString().substring(0, 10))));
   }
 
@@ -261,9 +263,9 @@ class GoalFormState extends State<GoalForm> {
   void updateSelectedDate(DateTime picked, bool isStartDateBtn) {
     setState(() {
       if (isStartDateBtn) {
-        _selectedProgress.startDate = picked;
+        selectedProgress.startDate = picked;
       } else {
-        _selectedProgress.endDate = picked;
+        selectedProgress.endDate = picked;
       }
     });
   }
@@ -313,13 +315,15 @@ class GoalFormState extends State<GoalForm> {
         }
 
         setState(() {
-          _hasTitleError = (_titleController.text == "");
-          _hasCategoryError = (_selectedCategory == null);
-          _hasPriorityError = (_selectedProgress.priority == null);
-          if (_selectedProgress.endDate != null &&
-              _selectedProgress.startDate != null) {
-            _hasDateError = (_selectedProgress.endDate
-                ?.isBefore(_selectedProgress.startDate!))!;
+          _hasTitleError = (titleController.text == "");
+          _hasCategoryError = (selectedCategory == null);
+          _hasPriorityError = (selectedProgress.priority == null);
+          if (_isEndDateToggleOn == false) selectedProgress.endDate = null;
+          if (_isStartDateToggleOn == false) selectedProgress.startDate = null;
+          if (selectedProgress.endDate != null &&
+              selectedProgress.startDate != null) {
+            _hasDateError = (selectedProgress.endDate
+                ?.isBefore(selectedProgress.startDate!))!;
           }
 
           viewModel.notifyListeners();
@@ -336,10 +340,10 @@ class GoalFormState extends State<GoalForm> {
 
           if (viewModel.goal == null) {
             viewModel.addGoal(
-                _titleController.text, _selectedCategory!, _selectedProgress);
+                titleController.text, selectedCategory!, selectedProgress);
           } else {
             viewModel.updateGoal(
-                _titleController.text, _selectedCategory!, _selectedProgress);
+                titleController.text, selectedCategory!, selectedProgress);
           }
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
