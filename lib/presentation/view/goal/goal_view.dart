@@ -58,8 +58,6 @@ class _GoalViewState extends State<GoalView>
       builder: (context, viewModel, child) {
         return Scaffold(
           appBar: AppBar(
-            title:
-                titleInterface(arg.goalId == null ? "New goal" : "Edit goal"),
             bottom: TabBar(
               controller: _tabController,
               tabs: const [

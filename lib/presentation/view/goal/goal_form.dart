@@ -33,18 +33,23 @@ class GoalFormState extends State<GoalForm> {
   bool _hasPriorityError = false;
   bool _hasDateError = false;
 
+  Object? _loadedGoalId;
+
+  /// Appelée une seule fois, donc la première fois que ce GoalForm apparaît à l'écran
   @override
   void initState() {
     super.initState();
     selectedProgress = Progress(isAccomplished: false);
-    // Prendre en compte le goal déjà chargé
     _updateFieldsFromGoal();
   }
 
+  /// Appelée quand le widget parent reconstruit ce GoalForm avec une nouvelle instance du weidget
   @override
   void didUpdateWidget(covariant GoalForm oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _updateFieldsFromGoal();
+    if (widget.viewModel.goal?.id != _loadedGoalId) {
+      _updateFieldsFromGoal(); //  appelé À CHAQUE reconstruction
+    }
   }
 
   void _updateFieldsFromGoal() {
@@ -56,6 +61,7 @@ class GoalFormState extends State<GoalForm> {
         selectedProgress = goal.progress;
         _isStartDateToggleOn = goal.progress.startDate != null;
         _isEndDateToggleOn = goal.progress.endDate != null;
+        _loadedGoalId = goal.id;
       });
     }
   }

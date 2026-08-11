@@ -44,6 +44,8 @@ class GoalViewModel extends BaseViewModel {
     await _goalService.saveGoal(_goal!);
 
     goalId = _goal?.id;
+
+    notifyListeners();
   }
 
   /// Effacer l'objectif existant (et retourner à la page d'accueil)

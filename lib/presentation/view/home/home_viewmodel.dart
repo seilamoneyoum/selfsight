@@ -25,13 +25,21 @@ class HomeViewModel extends BaseViewModel {
 
   /// Création d'un nouveau objectif
   Future<void> navigateToMainGoalView() async {
-    _navigationService.navigateTo(Routes.goalView,
-        arguments: GoalViewArguments(goalId: null));
+    // Ajoutez 'await' pour attendre la fermeture de la route
+    await _navigationService.navigateTo(
+      Routes.goalView,
+      arguments: GoalViewArguments(goalId: null),
+    );
+    // Rechargez après le retour
+    await loadGoals();
   }
 
   /// Accès au objectif existant
   Future<void> navigateToSpecificGoal(String goalId) async {
-    _navigationService.navigateTo(Routes.goalView,
-        arguments: GoalViewArguments(goalId: goalId));
+    await _navigationService.navigateTo(
+      Routes.goalView,
+      arguments: GoalViewArguments(goalId: goalId),
+    );
+    await loadGoals();
   }
 }
