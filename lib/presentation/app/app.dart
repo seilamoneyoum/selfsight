@@ -1,4 +1,3 @@
-import 'package:selfsight/presentation/view/goal/vision_board/vision_board_widget.dart';
 import 'package:selfsight/presentation/view/home/home_view.dart';
 import 'package:selfsight/presentation/view/goal/goal_view.dart';
 import 'package:stacked/stacked_annotations.dart';

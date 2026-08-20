@@ -87,7 +87,6 @@ class TaskWidget extends StatelessWidget {
         itemBuilder: (context, index) {
           return ListTile(
             title: Text("TEST"), //Text(viewModel.tasks[index]),
-            // You can add trailing delete icon if you like
             trailing: IconButton(
               icon: const Icon(Icons.delete),
               onPressed: () {

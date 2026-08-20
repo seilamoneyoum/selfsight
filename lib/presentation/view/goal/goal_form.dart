@@ -43,12 +43,13 @@ class GoalFormState extends State<GoalForm> {
     _updateFieldsFromGoal();
   }
 
-  /// Appelée quand le widget parent reconstruit ce GoalForm avec une nouvelle instance du weidget
+  /// Appelée quand le widget parent reconstruit ce GoalForm avec une nouvelle instance du widget
   @override
   void didUpdateWidget(covariant GoalForm oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.viewModel.goal?.id != _loadedGoalId) {
-      _updateFieldsFromGoal(); //  appelé À CHAQUE reconstruction
+    final currentGoal = widget.viewModel.goal;
+    if (currentGoal != null && currentGoal.id != _loadedGoalId) {
+      _updateFieldsFromGoal();
     }
   }
 
@@ -230,10 +231,10 @@ class GoalFormState extends State<GoalForm> {
         child: message(isStartDateBtn
             ? (selectedProgress.startDate != null
                 ? selectedProgress.startDate.toString().substring(0, 10)
-                : DateTime.now().toString().substring(0, 10))
+                : "Select date")
             : (selectedProgress.endDate != null
                 ? selectedProgress.endDate.toString().substring(0, 10)
-                : DateTime.now().toString().substring(0, 10))));
+                : "Select date")));
   }
 
   Theme theme(Widget? widget) {
@@ -341,7 +342,7 @@ class GoalFormState extends State<GoalForm> {
             !_hasPriorityError &&
             !_hasDateError) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Processing Data')),
+            const SnackBar(content: Text('New goal is added successfully ')),
           );
 
           if (viewModel.goal == null) {

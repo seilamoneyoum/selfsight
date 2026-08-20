@@ -6,7 +6,6 @@ import 'package:selfsight/presentation/view/goal/task/task_viewmodel.dart';
 import 'package:selfsight/presentation/view/goal/task/task_widget.dart';
 import 'package:selfsight/presentation/view/goal/vision_board/vision_board_viewmodel.dart';
 import 'package:selfsight/presentation/view/goal/vision_board/vision_board_widget.dart';
-import 'package:selfsight/presentation/view/templates.dart';
 import 'package:stacked/stacked.dart';
 
 class GoalView extends StatefulWidget {
