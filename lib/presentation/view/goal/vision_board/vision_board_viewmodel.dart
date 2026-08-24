@@ -157,32 +157,4 @@ class VisionBoardViewModel extends BaseViewModel {
 
     return Size(scaledWidth, scaledHeight);
   }
-
-  void addImages() {}
-
-  void selectElement() {}
-  void addElement() {}
-  void removeElement() {}
-
-  void saveBoard() {}
-  void quit() {}
-
-  void updatePhotoPosition(String photoId, double x, double y) {}
-  void updatePhotoRotation(String photoId, double rotation) {}
-  void updatePhotoSize(String photoId, double width, double height) {}
-  void bringToFront(String photoId) {}
-
-  void undo() {}
-  void redo() {}
-
-  void changeBackground(String imageUrl) {}
-  void changeBackgroundColor(Color color) {}
-
-  void exportAsImage() {}
-  void exportAsJson() {}
-  void importFromJson(String jsonData) {}
-
-  void clearSelection() {}
-  void resetBoard() {}
-  void toggleGrid(bool showGrid) {}
 }

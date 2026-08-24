@@ -23,8 +23,19 @@ class VisionBoardWidget extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              addImageButton(viewModel),
-              selectBackgroundButton(context, viewModel),
+              Column(
+                children: [
+                  if (viewModel.selectedId != "-1") imageOptions(viewModel),
+                  Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    spacing: 50,
+                    children: [
+                      addImageButton(viewModel),
+                      selectBackgroundButton(context, viewModel),
+                    ],
+                  ),
+                ],
+              )
             ],
           ),
         ],
@@ -32,26 +43,7 @@ class VisionBoardWidget extends StatelessWidget {
     );
   }
 
-  Container getBackgroundContainer(
-      VisionBoardViewModel viewModel, BuildContext context) {
-    return Container(
-      decoration: viewModel.isImageBackgroundSelected
-          ? BoxDecoration(
-              image: DecorationImage(
-                image: FileImage(viewModel.backgroundImage!),
-                fit: BoxFit.cover,
-              ),
-            )
-          : null,
-      color: viewModel.isImageBackgroundSelected
-          ? null
-          : viewModel.backgroundColor,
-      width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.width,
-      child: Stack(children: showImages(viewModel)),
-    );
-  }
-
+  // Affichage des images (lors du chargement, d'ajout de l'image ou de suppression de l'image)
   List<Widget> showImages(VisionBoardViewModel viewModel) {
     List<Widget> images = [];
     for (VisionBoardItem item in viewModel.allElements) {
@@ -61,6 +53,7 @@ class VisionBoardWidget extends StatelessWidget {
           top: item.position.dy,
           child: Stack(
             children: [
+              // Existing image widget
               GestureDetector(
                 onScaleStart: (details) {
                   viewModel.gestureStartScale = item.scale;
@@ -86,8 +79,7 @@ class VisionBoardWidget extends StatelessWidget {
                   ),
                 ),
               ),
-              if (viewModel.selectedId == item.id)
-                removeImageButton(viewModel, item),
+              if (viewModel.selectedId == item.id) imgSelectedWithBorder(item)
             ],
           ),
         ),
@@ -96,6 +88,23 @@ class VisionBoardWidget extends StatelessWidget {
     return images;
   }
 
+  Widget imgSelectedWithBorder(VisionBoardItem item) {
+    return IgnorePointer(
+      child: Container(
+        width: item.size.width * item.scale,
+        height: item.size.height * item.scale,
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: const Color.fromARGB(255, 8, 2, 2),
+            width: 4.0,
+          ),
+          borderRadius: BorderRadius.circular(4.0),
+        ),
+      ),
+    );
+  }
+
+  // Détection du movement des doigts (Changement par rapport à la taille et à la rotation de l'image)
   void gestureDetectorAct(
     ScaleUpdateDetails details,
     VisionBoardViewModel viewModel,
@@ -143,6 +152,20 @@ class VisionBoardWidget extends StatelessWidget {
     );
   }
 
+  // Ligne des options de l'image sélectionné
+  Wrap imageOptions(VisionBoardViewModel viewModel) {
+    return Wrap(
+      alignment: WrapAlignment.spaceBetween,
+      spacing: 10,
+      children: [
+        ElevatedButton(onPressed: () {}, child: Text('Btn 1')),
+        ElevatedButton(onPressed: () {}, child: Text('Btn 2')),
+      ],
+    );
+  }
+  // =================================== BACKGROUND =========================================================
+
+  // Met à jour l'image ou la couleur de l'arrière-plan de vision board
   ElevatedButton selectBackgroundButton(
       BuildContext context, VisionBoardViewModel viewModel) {
     return ElevatedButton(
@@ -150,6 +173,27 @@ class VisionBoardWidget extends StatelessWidget {
         showOptionMenu(context, viewModel);
       },
       child: message("Select background"),
+    );
+  }
+
+  // Charger l'image ou la couleur de l'arrière-plan de vision board
+  Container getBackgroundContainer(
+      VisionBoardViewModel viewModel, BuildContext context) {
+    return Container(
+      decoration: viewModel.isImageBackgroundSelected
+          ? BoxDecoration(
+              image: DecorationImage(
+                image: FileImage(viewModel.backgroundImage!),
+                fit: BoxFit.cover,
+              ),
+            )
+          : null,
+      color: viewModel.isImageBackgroundSelected
+          ? null
+          : viewModel.backgroundColor,
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.width,
+      child: Stack(children: showImages(viewModel)),
     );
   }
 }
