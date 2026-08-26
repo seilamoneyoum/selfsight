@@ -2,44 +2,75 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:selfsight/domain/entities/vision_board/vision_board_item.dart';
 import 'package:selfsight/presentation/view/goal/vision_board/background_manipulations.dart';
+import 'package:selfsight/presentation/view/goal/vision_board/images_alignment_functions.dart';
 import 'package:selfsight/presentation/view/goal/vision_board/vision_board_viewmodel.dart';
 import 'package:selfsight/presentation/view/templates.dart';
 
-class VisionBoardWidget extends StatelessWidget {
+class VisionBoardWidget extends StatefulWidget {
   final VisionBoardViewModel viewModel;
 
-  const VisionBoardWidget({Key? key, required this.viewModel})
-      : super(key: key);
+  const VisionBoardWidget({super.key, required this.viewModel});
 
+  @override
+  State<VisionBoardWidget> createState() => _VisionBoardWidgetState();
+}
+
+class _VisionBoardWidgetState extends State<VisionBoardWidget> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: double.infinity,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          getBackgroundContainer(viewModel, context),
+        width: double.infinity,
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              getBackgroundContainer(widget.viewModel, context),
+              widget.viewModel.isAlignMode
+                  ? alignImagesContainer(context, widget.viewModel)
+                  : mainVisionBoardFunctions(context)
+            ]));
+  }
+
+  Column mainVisionBoardFunctions(BuildContext context) {
+    return Column(
+      children: [
+        if (widget.viewModel.selectedId != "-1")
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               Column(
                 children: [
-                  if (viewModel.selectedId != "-1") imageOptions(viewModel),
-                  Wrap(
-                    alignment: WrapAlignment.spaceBetween,
-                    spacing: 50,
-                    children: [
-                      addImageButton(viewModel),
-                      selectBackgroundButton(context, viewModel),
-                    ],
-                  ),
+                  imageOptions(widget.viewModel),
+                  ElevatedButton(
+                    onPressed: () {
+                      widget.viewModel.setAlignImagesMode(true);
+                    },
+                    child: message("Align images"),
+                  )
                 ],
               )
             ],
           ),
-        ],
-      ),
+        Wrap(
+          // Ligne de boutons d'ajout d'image et de sélectionner le type de fond d'écran
+          alignment: WrapAlignment.spaceBetween,
+          spacing: 50,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                widget.viewModel.pickMultipleImages();
+              },
+              child: message("Add image"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                showOptionMenu(context, widget.viewModel);
+              },
+              child: message("Select background"),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -51,36 +82,48 @@ class VisionBoardWidget extends StatelessWidget {
         Positioned(
           left: item.position.dx,
           top: item.position.dy,
-          child: Stack(
-            children: [
-              // Existing image widget
-              GestureDetector(
-                onScaleStart: (details) {
-                  viewModel.gestureStartScale = item.scale;
-                  viewModel.gestureStartRotation = item.rotation;
-                  viewModel.selectItem(item.id);
-                },
-                onScaleUpdate: (details) =>
-                    gestureDetectorAct(details, viewModel, item),
-                onScaleEnd: (details) {
-                  viewModel.gestureStartScale = null;
-                  viewModel.gestureStartRotation = null;
-                },
-                onTap: () {
-                  viewModel.selectItem(item.id);
-                },
-                child: Transform.rotate(
-                  angle: item.rotation,
-                  child: Image.file(
+          child: GestureDetector(
+            onScaleStart: (details) {
+              viewModel.gestureStartScale = item.scale;
+              viewModel.gestureStartRotation = item.rotation;
+              viewModel.selectItem(item.id);
+            },
+            onScaleUpdate: (details) =>
+                gestureDetectorAct(details, viewModel, item),
+            onScaleEnd: (details) {
+              viewModel.gestureStartScale = null;
+              viewModel.gestureStartRotation = null;
+            },
+            onTap: () {
+              viewModel.selectItem(item.id);
+            },
+            child: Transform.rotate(
+              angle: item.rotation,
+              child: Stack(
+                children: [
+                  Image.file(
                     File(item.imagePath),
                     width: item.size.width * item.scale,
                     height: item.size.height * item.scale,
                     fit: BoxFit.cover,
                   ),
-                ),
+                  if (viewModel.selectedId == item.id)
+                    IgnorePointer(
+                      child: Container(
+                        width: item.size.width * item.scale,
+                        height: item.size.height * item.scale,
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: const Color.fromARGB(255, 8, 2, 2),
+                            width: 4.0,
+                          ),
+                          borderRadius: BorderRadius.circular(4.0),
+                        ),
+                      ),
+                    ),
+                ],
               ),
-              if (viewModel.selectedId == item.id) imgSelectedWithBorder(item)
-            ],
+            ),
           ),
         ),
       );
@@ -124,25 +167,6 @@ class VisionBoardWidget extends StatelessWidget {
     viewModel.notifyListeners();
   }
 
-  Positioned removeImageButton(
-      VisionBoardViewModel viewModel, VisionBoardItem item) {
-    return Positioned(
-      right: 0,
-      top: 0,
-      child: GestureDetector(
-        onTap: () => viewModel.removeItem(item.id),
-        child: Container(
-          decoration: const BoxDecoration(
-            color: Colors.red,
-            shape: BoxShape.circle,
-          ),
-          padding: const EdgeInsets.all(4),
-          child: const Icon(Icons.close, color: Colors.white, size: 13),
-        ),
-      ),
-    );
-  }
-
   ElevatedButton addImageButton(VisionBoardViewModel viewModel) {
     return ElevatedButton(
       onPressed: () {
@@ -157,9 +181,36 @@ class VisionBoardWidget extends StatelessWidget {
     return Wrap(
       alignment: WrapAlignment.spaceBetween,
       spacing: 10,
+      runSpacing: 10,
       children: [
-        ElevatedButton(onPressed: () {}, child: Text('Btn 1')),
-        ElevatedButton(onPressed: () {}, child: Text('Btn 2')),
+        ElevatedButton(
+          onPressed: () {
+            viewModel.removeItem(viewModel.selectedId);
+          },
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          ),
+          child: const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.delete_outline, size: 28),
+            ],
+          ),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            viewModel.resetRotation();
+          },
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          ),
+          child: const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.rotate_right, size: 28),
+            ],
+          ),
+        ),
       ],
     );
   }

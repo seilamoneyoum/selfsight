@@ -8,7 +8,6 @@ InputDecoration labelInput(String label) {
       border: OutlineInputBorder(),
       labelStyle: GoogleFonts.poppins(
         fontSize: 13,
-        color: Colors.black,
       ));
 }
 
@@ -18,7 +17,6 @@ Text message(String message) {
     message,
     style: GoogleFonts.poppins(
       fontSize: 13,
-      color: Colors.black,
     ),
   );
 }
@@ -27,10 +25,14 @@ Text message(String message) {
 Text titleInterface(String title) {
   return Text(
     title,
-    style: GoogleFonts.poppins(
-      fontSize: 24,
-      fontWeight: FontWeight.bold,
-      color: Colors.black,
-    ),
+    style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold),
+  );
+}
+
+// Template du titre d'un "sous-interface"
+Text titleSubInterface(String title) {
+  return Text(
+    title,
+    style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold),
   );
 }

@@ -8,9 +8,20 @@ import 'package:path_provider/path_provider.dart';
 
 class VisionBoardViewModel extends BaseViewModel {
   int _pointerCount = 0;
+  bool _isAlignMode = false;
 
+  bool get isAlignMode => _isAlignMode;
+  String? axisSelection;
+  String? positionSelection;
+
+  List<String> selectedIds = [];
   double? gestureStartScale;
   double? gestureStartRotation;
+
+  void setAlignImagesMode(bool alignMode) {
+    _isAlignMode = alignMode;
+    notifyListeners();
+  }
 
   void incrementPointerCount() {
     _pointerCount++;
@@ -73,6 +84,11 @@ class VisionBoardViewModel extends BaseViewModel {
     elements.removeWhere((item) => item.id == id);
     selectedId = "-1";
     selectedItem = null;
+    notifyListeners();
+  }
+
+  void resetRotation() {
+    selectedItem?.rotation = 0;
     notifyListeners();
   }
 
@@ -156,5 +172,49 @@ class VisionBoardViewModel extends BaseViewModel {
     final scaledHeight = originalHeight * scale;
 
     return Size(scaledWidth, scaledHeight);
+  }
+
+  void alignImages({required String axis, required String position}) {
+    // À modifier [...]
+    notifyListeners();
+  }
+
+  void enterAlignMode() {
+    if (selectedIds.length < 2) {
+      return;
+    }
+    _isAlignMode = true;
+    axisSelection = null;
+    positionSelection = null;
+    notifyListeners();
+  }
+
+  // Quitter le mode alignement
+  void exitAlignMode() {
+    _isAlignMode = false;
+    axisSelection = null;
+    positionSelection = null;
+    notifyListeners();
+  }
+
+  // Mettre à jour l'axe
+  void setAxis(String axis) {
+    axisSelection = axis;
+    positionSelection = null;
+    notifyListeners();
+  }
+
+  // Mettre à jour la position
+  void setPosition(String position) {
+    positionSelection = position;
+    notifyListeners();
+  }
+
+  // Appliquer l'alignement
+  void applyAlignment() {
+    if (axisSelection != null && positionSelection != null) {
+      alignImages(axis: axisSelection!, position: positionSelection!);
+      exitAlignMode();
+    }
   }
 }
