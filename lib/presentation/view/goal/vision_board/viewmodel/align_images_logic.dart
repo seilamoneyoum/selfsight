@@ -6,6 +6,8 @@ class AlignImagesLogic {
   bool get isAlignMode => _isAlignMode;
   String? axisSelection;
   String? positionSelection;
+  List<String> _selectedIds = [];
+  List<String> get selectedIds => _selectedIds;
 
   AlignImagesLogic({required this.viewModel});
 
@@ -20,10 +22,8 @@ class AlignImagesLogic {
   }
 
   void enterAlignMode() {
-    if (viewModel.selectedIds.length < 2) {
-      return;
-    }
     _isAlignMode = true;
+    _selectedIds = [];
     axisSelection = null;
     positionSelection = null;
     viewModel.notifyListeners();
@@ -32,6 +32,7 @@ class AlignImagesLogic {
   // Quitter le mode alignement
   void exitAlignMode() {
     _isAlignMode = false;
+    _selectedIds = [];
     axisSelection = null;
     positionSelection = null;
     viewModel.notifyListeners();

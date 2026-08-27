@@ -20,8 +20,6 @@ class VisionBoardViewModel extends BaseViewModel {
     imageLogic = ImageLogic(viewModel: this);
   }
 
-  List<String> _selectedIds = [];
-  List<String> get selectedIds => _selectedIds;
   double? gestureStartScale;
   double? gestureStartRotation;
 

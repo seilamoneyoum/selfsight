@@ -87,7 +87,9 @@ class _VisionBoardWidgetState extends State<VisionBoardWidget> {
             onScaleStart: (details) {
               viewModel.gestureStartScale = item.scale;
               viewModel.gestureStartRotation = item.rotation;
-              viewModel.selectItem(item.id);
+              if (!viewModel.alignImagesLogic.isAlignMode) {
+                viewModel.selectItem(item.id);
+              }
             },
             onScaleUpdate: (details) =>
                 gestureDetectorAct(details, viewModel, item),
@@ -96,7 +98,18 @@ class _VisionBoardWidgetState extends State<VisionBoardWidget> {
               viewModel.gestureStartRotation = null;
             },
             onTap: () {
-              viewModel.selectItem(item.id);
+              if (viewModel.alignImagesLogic.isAlignMode &&
+                  viewModel.selectedId != item.id) {
+                if (viewModel.alignImagesLogic.selectedIds.contains(item.id)) {
+                  viewModel.alignImagesLogic.selectedIds.remove(item.id);
+                  viewModel.notifyListeners();
+                } else {
+                  viewModel.alignImagesLogic.selectedIds.add(item.id);
+                  viewModel.notifyListeners();
+                }
+              } else if (!viewModel.alignImagesLogic.isAlignMode) {
+                viewModel.selectItem(item.id);
+              }
             },
             child: Transform.rotate(
               angle: item.rotation,
@@ -115,13 +128,28 @@ class _VisionBoardWidgetState extends State<VisionBoardWidget> {
                         height: item.size.height * item.scale,
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: const Color.fromARGB(255, 8, 2, 2),
+                            color: Colors.red,
                             width: 4.0,
                           ),
                           borderRadius: BorderRadius.circular(4.0),
                         ),
                       ),
-                    ),
+                    )
+                  else if (viewModel.alignImagesLogic.selectedIds
+                      .contains(item.id))
+                    IgnorePointer(
+                      child: Container(
+                        width: item.size.width * item.scale,
+                        height: item.size.height * item.scale,
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Colors.blue,
+                            width: 4.0,
+                          ),
+                          borderRadius: BorderRadius.circular(4.0),
+                        ),
+                      ),
+                    )
                 ],
               ),
             ),
@@ -139,7 +167,7 @@ class _VisionBoardWidgetState extends State<VisionBoardWidget> {
         height: item.size.height * item.scale,
         decoration: BoxDecoration(
           border: Border.all(
-            color: const Color.fromARGB(255, 8, 2, 2),
+            color: Colors.black,
             width: 4.0,
           ),
           borderRadius: BorderRadius.circular(4.0),
