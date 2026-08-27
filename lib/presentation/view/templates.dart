@@ -28,11 +28,3 @@ Text titleInterface(String title) {
     style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold),
   );
 }
-
-// Template du titre d'un "sous-interface"
-Text titleSubInterface(String title) {
-  return Text(
-    title,
-    style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold),
-  );
-}

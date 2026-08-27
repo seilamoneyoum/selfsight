@@ -20,7 +20,7 @@ void showOptionMenu(BuildContext context, VisionBoardViewModel viewModel) {
             ListTile(
               title: const Text('Select image background'),
               onTap: () {
-                viewModel.pickBackgroundImage();
+                viewModel.backgroundLogic.pickBackgroundImage();
                 Navigator.pop(context);
               },
             ),
@@ -41,7 +41,7 @@ void _showColorPicker(BuildContext context, VisionBoardViewModel viewModel) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
-      Color tempColor = viewModel.backgroundColor;
+      Color tempColor = viewModel.backgroundLogic.backgroundColor;
       return AlertDialog(
         title: Text('Pick a color'),
         content: ColorPicker(
@@ -57,7 +57,7 @@ void _showColorPicker(BuildContext context, VisionBoardViewModel viewModel) {
           ),
           TextButton(
             onPressed: () {
-              viewModel.backgroundColor = tempColor;
+              viewModel.backgroundLogic.backgroundColor = tempColor;
               Navigator.pop(context);
             },
             child: Text('Apply'),

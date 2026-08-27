@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:selfsight/domain/entities/vision_board/vision_board_item.dart';
-import 'package:selfsight/presentation/view/goal/vision_board/background_manipulations.dart';
-import 'package:selfsight/presentation/view/goal/vision_board/images_alignment_functions.dart';
+import 'package:selfsight/presentation/view/goal/vision_board/widget/background_container.dart';
+import 'package:selfsight/presentation/view/goal/vision_board/widget/align_images_container.dart';
 import 'package:selfsight/presentation/view/goal/vision_board/vision_board_viewmodel.dart';
 import 'package:selfsight/presentation/view/templates.dart';
 
@@ -25,13 +25,13 @@ class _VisionBoardWidgetState extends State<VisionBoardWidget> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               getBackgroundContainer(widget.viewModel, context),
-              widget.viewModel.isAlignMode
+              widget.viewModel.alignImagesLogic.isAlignMode
                   ? alignImagesContainer(context, widget.viewModel)
-                  : mainVisionBoardFunctions(context)
+                  : mainOptions(context)
             ]));
   }
 
-  Column mainVisionBoardFunctions(BuildContext context) {
+  Column mainOptions(BuildContext context) {
     return Column(
       children: [
         if (widget.viewModel.selectedId != "-1")
@@ -43,7 +43,8 @@ class _VisionBoardWidgetState extends State<VisionBoardWidget> {
                   imageOptions(widget.viewModel),
                   ElevatedButton(
                     onPressed: () {
-                      widget.viewModel.setAlignImagesMode(true);
+                      widget.viewModel.alignImagesLogic
+                          .setAlignImagesMode(true);
                     },
                     child: message("Align images"),
                   )
@@ -185,7 +186,7 @@ class _VisionBoardWidgetState extends State<VisionBoardWidget> {
       children: [
         ElevatedButton(
           onPressed: () {
-            viewModel.removeItem(viewModel.selectedId);
+            viewModel.imageLogic.removeItem(viewModel.selectedId);
           },
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -199,7 +200,7 @@ class _VisionBoardWidgetState extends State<VisionBoardWidget> {
         ),
         ElevatedButton(
           onPressed: () {
-            viewModel.resetRotation();
+            viewModel.imageLogic.resetRotation();
           },
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -231,17 +232,17 @@ class _VisionBoardWidgetState extends State<VisionBoardWidget> {
   Container getBackgroundContainer(
       VisionBoardViewModel viewModel, BuildContext context) {
     return Container(
-      decoration: viewModel.isImageBackgroundSelected
+      decoration: viewModel.backgroundLogic.isImageBackgroundSelected
           ? BoxDecoration(
               image: DecorationImage(
-                image: FileImage(viewModel.backgroundImage!),
+                image: FileImage(viewModel.backgroundLogic.backgroundImage!),
                 fit: BoxFit.cover,
               ),
             )
           : null,
-      color: viewModel.isImageBackgroundSelected
+      color: viewModel.backgroundLogic.isImageBackgroundSelected
           ? null
-          : viewModel.backgroundColor,
+          : viewModel.backgroundLogic.backgroundColor,
       width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.width,
       child: Stack(children: showImages(viewModel)),

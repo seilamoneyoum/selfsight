@@ -2,62 +2,37 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:selfsight/domain/entities/vision_board/vision_board_item.dart';
+import 'package:selfsight/presentation/view/goal/vision_board/viewmodel/align_images_logic.dart';
+import 'package:selfsight/presentation/view/goal/vision_board/viewmodel/background_logic.dart';
+import 'package:selfsight/presentation/view/goal/vision_board/viewmodel/image_logic.dart';
 import 'package:stacked/stacked.dart';
 import 'package:image/image.dart' as image;
 import 'package:path_provider/path_provider.dart';
 
 class VisionBoardViewModel extends BaseViewModel {
-  int _pointerCount = 0;
-  bool _isAlignMode = false;
+  late final AlignImagesLogic alignImagesLogic;
+  late final BackgroundLogic backgroundLogic;
+  late final ImageLogic imageLogic;
 
-  bool get isAlignMode => _isAlignMode;
-  String? axisSelection;
-  String? positionSelection;
+  VisionBoardViewModel() {
+    alignImagesLogic = AlignImagesLogic(viewModel: this);
+    backgroundLogic = BackgroundLogic(viewModel: this);
+    imageLogic = ImageLogic(viewModel: this);
+  }
 
-  List<String> selectedIds = [];
+  List<String> _selectedIds = [];
+  List<String> get selectedIds => _selectedIds;
   double? gestureStartScale;
   double? gestureStartRotation;
 
-  void setAlignImagesMode(bool alignMode) {
-    _isAlignMode = alignMode;
-    notifyListeners();
-  }
-
-  void incrementPointerCount() {
-    _pointerCount++;
-    notifyListeners();
-  }
-
-  void decrementPointerCount() {
-    if (_pointerCount > 0) _pointerCount--;
-    notifyListeners();
-  }
-
-  bool get isMultiTouch => _pointerCount >= 2;
-
   //late VisionBoard visionBoard;
-  bool isImageBackgroundSelected = false;
+
   List<VisionBoardItem> elements = [];
   VisionBoardItem? selectedItem;
-  Color _backgroundColor = Colors.white;
-  File? _backgroundImage;
+
   String selectedId = "-1";
 
   List<VisionBoardItem> get allElements => elements;
-  Color get backgroundColor => _backgroundColor;
-  File? get backgroundImage => _backgroundImage;
-
-  set backgroundColor(Color newColor) {
-    isImageBackgroundSelected = false;
-    _backgroundColor = newColor;
-    notifyListeners();
-  }
-
-  set backgroundImage(File? newFile) {
-    isImageBackgroundSelected = true;
-    _backgroundImage = newFile;
-    notifyListeners();
-  }
 
   void resetValues() {
     selectedId = "-1";
@@ -68,40 +43,6 @@ class VisionBoardViewModel extends BaseViewModel {
   void selectItem(String id) {
     selectedId = id;
     selectedItem = elements.where((item) => item.id == id).first;
-    notifyListeners();
-  }
-
-  void removeItem(String id) {
-    final itemToRemove = elements.firstWhere((item) => item.id == id);
-
-    try {
-      final file = File(itemToRemove.imagePath);
-      if (file.existsSync()) {
-        file.deleteSync();
-      }
-    } catch (e) {}
-
-    elements.removeWhere((item) => item.id == id);
-    selectedId = "-1";
-    selectedItem = null;
-    notifyListeners();
-  }
-
-  void resetRotation() {
-    selectedItem?.rotation = 0;
-    notifyListeners();
-  }
-
-  void pickBackgroundImage() async {
-    final XFile? selectedXFile = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 20,
-    );
-
-    if (selectedXFile == null) return;
-
-    backgroundImage = File(selectedXFile.path);
-
     notifyListeners();
   }
 
@@ -172,49 +113,5 @@ class VisionBoardViewModel extends BaseViewModel {
     final scaledHeight = originalHeight * scale;
 
     return Size(scaledWidth, scaledHeight);
-  }
-
-  void alignImages({required String axis, required String position}) {
-    // À modifier [...]
-    notifyListeners();
-  }
-
-  void enterAlignMode() {
-    if (selectedIds.length < 2) {
-      return;
-    }
-    _isAlignMode = true;
-    axisSelection = null;
-    positionSelection = null;
-    notifyListeners();
-  }
-
-  // Quitter le mode alignement
-  void exitAlignMode() {
-    _isAlignMode = false;
-    axisSelection = null;
-    positionSelection = null;
-    notifyListeners();
-  }
-
-  // Mettre à jour l'axe
-  void setAxis(String axis) {
-    axisSelection = axis;
-    positionSelection = null;
-    notifyListeners();
-  }
-
-  // Mettre à jour la position
-  void setPosition(String position) {
-    positionSelection = position;
-    notifyListeners();
-  }
-
-  // Appliquer l'alignement
-  void applyAlignment() {
-    if (axisSelection != null && positionSelection != null) {
-      alignImages(axis: axisSelection!, position: positionSelection!);
-      exitAlignMode();
-    }
   }
 }

@@ -13,7 +13,7 @@ Column alignImagesContainer(
       const SizedBox(height: 12),
 
       // Sélection de la position (si axe choisi)
-      if (viewModel.axisSelection != null) ...[
+      if (viewModel.alignImagesLogic.axisSelection != null) ...[
         _positionSegmentButtons(viewModel),
         const SizedBox(height: 16),
       ],
@@ -55,10 +55,11 @@ Row _axisSegmentButtons(VisionBoardViewModel viewModel) {
         ButtonSegment(value: 'horizontal', label: Text('Horizontal')),
         ButtonSegment(value: 'vertical', label: Text('Vertical')),
       ],
-      selected:
-          viewModel.axisSelection != null ? {viewModel.axisSelection!} : {},
+      selected: viewModel.alignImagesLogic.axisSelection != null
+          ? {viewModel.alignImagesLogic.axisSelection!}
+          : {},
       onSelectionChanged: (Set<String> newSelection) {
-        viewModel.setAxis(newSelection.first);
+        viewModel.alignImagesLogic.setAxis(newSelection.first);
       },
       style: _segmentButtonStyle,
     ),
@@ -73,7 +74,7 @@ Row _positionSegmentButtons(VisionBoardViewModel viewModel) {
     SegmentedButton<String>(
       showSelectedIcon: false,
       emptySelectionAllowed: true,
-      segments: viewModel.axisSelection == 'horizontal'
+      segments: viewModel.alignImagesLogic.axisSelection == 'horizontal'
           ? const [
               ButtonSegment(value: 'left', label: Text('Left')),
               ButtonSegment(value: 'center', label: Text('Center')),
@@ -84,11 +85,11 @@ Row _positionSegmentButtons(VisionBoardViewModel viewModel) {
               ButtonSegment(value: 'center', label: Text('Center')),
               ButtonSegment(value: 'bottom', label: Text('Bottom')),
             ],
-      selected: viewModel.positionSelection != null
-          ? {viewModel.positionSelection!}
+      selected: viewModel.alignImagesLogic.positionSelection != null
+          ? {viewModel.alignImagesLogic.positionSelection!}
           : {},
       onSelectionChanged: (Set<String> newSelection) {
-        viewModel.setPosition(newSelection.first);
+        viewModel.alignImagesLogic.setPosition(newSelection.first);
       },
       style: _segmentButtonStyle,
     ),
@@ -100,14 +101,14 @@ Row _finalActionButtons(VisionBoardViewModel viewModel) {
     mainAxisAlignment: MainAxisAlignment.end,
     children: [
       TextButton(
-        onPressed: viewModel.exitAlignMode,
+        onPressed: viewModel.alignImagesLogic.exitAlignMode,
         child: const Text('Cancel'),
       ),
       const SizedBox(width: 8),
       ElevatedButton(
-        onPressed: (viewModel.axisSelection != null &&
-                viewModel.positionSelection != null)
-            ? viewModel.applyAlignment
+        onPressed: (viewModel.alignImagesLogic.axisSelection != null &&
+                viewModel.alignImagesLogic.positionSelection != null)
+            ? viewModel.alignImagesLogic.applyAlignment
             : null,
         child: const Text('Apply'),
       ),
