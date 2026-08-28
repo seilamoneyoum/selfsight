@@ -110,17 +110,6 @@ class GoalFormState extends State<GoalForm> {
   }
 
   // ======================== Sous-méthodes ====================================
-
-  Text errorMessage(String text) {
-    return Text(
-      text,
-      style: GoogleFonts.poppins(
-        fontSize: 10,
-        color: Colors.red,
-      ),
-    );
-  }
-
   TextFormField titleField() {
     return TextFormField(
       controller: titleController,

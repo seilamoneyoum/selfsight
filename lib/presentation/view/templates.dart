@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 InputDecoration labelInput(String label) {
   return InputDecoration(
       labelText: label,
-      border: OutlineInputBorder(),
+      isDense: true,
       labelStyle: GoogleFonts.poppins(
         fontSize: 13,
       ));
@@ -21,10 +21,36 @@ Text message(String message) {
   );
 }
 
+// Template du "sous-texte"
+Text subMessage(String message) {
+  return Text(
+    message,
+    style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey[600]),
+  );
+}
+
 // Template du titre de l'interface
 Text titleInterface(String title) {
   return Text(
     title,
     style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold),
+  );
+}
+
+// Template du sous-titre de l'interface
+Text subtitleInterface(String title) {
+  return Text(
+    title,
+    style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600),
+  );
+}
+
+Text errorMessage(String text) {
+  return Text(
+    text,
+    style: GoogleFonts.poppins(
+      fontSize: 10,
+      color: Colors.red,
+    ),
   );
 }

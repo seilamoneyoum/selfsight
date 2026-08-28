@@ -1,4 +1,5 @@
 import 'package:selfsight/services/goal_service.dart';
+import 'package:selfsight/services/task_service.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:get_it/get_it.dart';
 
@@ -14,6 +15,7 @@ class AppSetup {
 //    locator.registerLazySingleton(() => JwtDecoderWrapper());
     locator.registerLazySingleton(() => NavigationService());
     locator.registerLazySingleton(() => GoalService());
+    locator.registerLazySingleton(() => TaskService());
 
     //locator.registerLazySingleton(() => DialogService());
     //locator.registerLazySingleton(() => http.Client());

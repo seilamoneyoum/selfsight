@@ -70,9 +70,9 @@ class _GoalViewState extends State<GoalView>
             controller: _pageController,
             physics: const NeverScrollableScrollPhysics(),
             children: [
-              goalFormContainer(viewModel as GoalViewModel),
-              visionBoardContainer(),
-              tasksHandlerContainer(),
+              _goalFormContainer(viewModel as GoalViewModel),
+              _visionBoardContainer(),
+              _tasksHandlerContainer(arg.goalId),
             ],
           ),
         );
@@ -81,15 +81,15 @@ class _GoalViewState extends State<GoalView>
   }
 }
 
-ViewModelBuilder<TaskViewModel> tasksHandlerContainer() {
+ViewModelBuilder<TaskViewModel> _tasksHandlerContainer(String? goalId) {
   return ViewModelBuilder.reactive(
-    viewModelBuilder: () => TaskViewModel(),
+    viewModelBuilder: () => TaskViewModel(goalId: goalId),
     builder: (context, visionBoardVM, child) =>
         TaskWidget(viewModel: visionBoardVM),
   );
 }
 
-ViewModelBuilder<VisionBoardViewModel> visionBoardContainer() {
+ViewModelBuilder<VisionBoardViewModel> _visionBoardContainer() {
   return ViewModelBuilder.reactive(
     viewModelBuilder: () => VisionBoardViewModel(),
     builder: (context, visionBoardVM, child) =>
@@ -97,7 +97,7 @@ ViewModelBuilder<VisionBoardViewModel> visionBoardContainer() {
   );
 }
 
-Container goalFormContainer(GoalViewModel viewModel) {
+Container _goalFormContainer(GoalViewModel viewModel) {
   return Container(
     margin: EdgeInsets.all(16.0),
     child: Column(
