@@ -13,9 +13,14 @@ class TaskWidget extends StatefulWidget {
   State<TaskWidget> createState() => _TaskWidgetState();
 }
 
-class _TaskWidgetState extends State<TaskWidget> {
+class _TaskWidgetState extends State<TaskWidget>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -32,7 +37,7 @@ class _TaskWidgetState extends State<TaskWidget> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        subtitleInterface("    " + "Tasks"),
+        subtitleInterface("    " "Tasks"),
         IconButton(
           icon: const Icon(Icons.add_circle_outline),
           onPressed: () => _openTaskForm(context),

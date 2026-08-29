@@ -18,7 +18,10 @@ class GoalForm extends StatefulWidget {
   }
 }
 
-class GoalFormState extends State<GoalForm> {
+class GoalFormState extends State<GoalForm> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   final _formKey = GlobalKey<FormState>();
   final TextEditingController titleController = TextEditingController();
 
@@ -75,6 +78,7 @@ class GoalFormState extends State<GoalForm> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Form(
       key: _formKey,
       child: Column(

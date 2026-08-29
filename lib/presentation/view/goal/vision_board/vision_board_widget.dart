@@ -15,9 +15,14 @@ class VisionBoardWidget extends StatefulWidget {
   State<VisionBoardWidget> createState() => _VisionBoardWidgetState();
 }
 
-class _VisionBoardWidgetState extends State<VisionBoardWidget> {
+class _VisionBoardWidgetState extends State<VisionBoardWidget>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return SizedBox(
         width: double.infinity,
         child: Column(
