@@ -1,4 +1,3 @@
-// task_viewmodel.dart
 import 'package:stacked/stacked.dart';
 import 'package:selfsight/presentation/app/app_setup.dart';
 import 'package:selfsight/services/task_service.dart';
@@ -14,15 +13,16 @@ class TaskViewModel extends BaseViewModel {
   List<Task> _tasks = [];
   List<Task> get tasks => _tasks;
 
-  // ID de la tâche en cours de modification (null si on crée une nouvelle tâche)
   String? _editingId;
   String? get editingId => _editingId;
 
   Task? get editingTask =>
       _editingId != null ? _tasks.firstWhere((t) => t.id == _editingId) : null;
 
-  /// Charger les tâches existantes liées à cet objectif
+  /// Charger les tâches existantes liées à cet objectif.
+  /// Si le goal n'a pas encore été sauvegardé, il n'y a rien à charger.
   Future<void> loadTasks() async {
+    if (goalId == null) return;
     try {
       setBusy(true);
       _tasks = await _taskService.getTasksByGoalId(goalId!);
@@ -32,42 +32,38 @@ class TaskViewModel extends BaseViewModel {
     }
   }
 
-  /// Prépare le formulaire pour l'ajout d'une nouvelle tâche
   void startAddingTask() {
     _editingId = null;
     notifyListeners();
   }
 
-  /// Prépare le formulaire pour la modification d'une tâche existante
   void startEditingTask(String id) {
     _editingId = id;
     notifyListeners();
   }
 
-  /// Réinitialise l'état d'édition (ex: à la fermeture du formulaire)
   void cancelEditing() {
     _editingId = null;
     notifyListeners();
   }
 
-  /// Ajoute une nouvelle tâche
+  /// Ajoute une nouvelle tâche. Persistée seulement si le goal est déjà sauvegardé.
   Future<void> addTask(String name, Frequency frequency) async {
-    try {
-      final task = Task(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        goalId: goalId!,
-        name: name,
-        frequency: frequency,
-      );
+    final task = Task(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      goalId: goalId ?? '',
+      name: name,
+      frequency: frequency,
+    );
 
+    if (goalId != null) {
       await _taskService.saveTask(task);
-      _tasks.add(task);
-    } finally {
-      notifyListeners();
     }
+    _tasks.add(task);
+    notifyListeners();
   }
 
-  /// Met à jour la tâche actuellement sélectionnée pour édition
+  /// Met à jour la tâche en édition. Persistée seulement si le goal est déjà sauvegardé.
   Future<void> updateTask(String name, Frequency frequency) async {
     if (_editingId == null) return;
 
@@ -76,20 +72,24 @@ class TaskViewModel extends BaseViewModel {
 
     final updated = Task(
       id: _editingId!,
-      goalId: goalId!,
+      goalId: goalId ?? '',
       name: name,
       frequency: frequency,
     );
 
-    await _taskService.updateTask(updated);
+    if (goalId != null) {
+      await _taskService.updateTask(updated);
+    }
     _tasks[index] = updated;
     _editingId = null;
     notifyListeners();
   }
 
-  /// Supprime une tâche
+  /// Supprime une tâche. Persistée seulement si le goal est déjà sauvegardé.
   Future<void> deleteTask(String id) async {
-    await _taskService.deleteTask(id);
+    if (goalId != null) {
+      await _taskService.deleteTask(id);
+    }
     _tasks.removeWhere((t) => t.id == id);
     if (_editingId == id) {
       _editingId = null;

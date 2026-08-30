@@ -101,7 +101,7 @@ class _TaskWidgetState extends State<TaskWidget>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: message('Confirm Action'),
+        title: subtitleInterface('Confirm Action'),
         content: message(
             'Are you sure you want to delete this task? Once you delete this task, there is no way of retrieving it.'),
         actions: [
