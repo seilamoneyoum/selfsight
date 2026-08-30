@@ -28,9 +28,6 @@ String frequencySummary(Frequency frequency) {
   if (frequency.time != null && frequency.unit != null) {
     parts.add("${frequency.time} ${capitalize(frequency.unit!.name)}");
   }
-  if (frequency.period != null) {
-    parts.add("per ${capitalize(frequency.period!.name)}");
-  }
   if (frequency.days != null && frequency.days!.isNotEmpty) {
     parts.add(frequency.days!.map(dayLabel).join(", "));
   }

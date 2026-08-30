@@ -21,12 +21,12 @@ class TaskFormSheetState extends State<TaskFormSheet> {
   final TextEditingController timeController = TextEditingController();
 
   Unit? selectedUnit;
-  Period? selectedPeriod;
   List<Day> selectedDays = [];
 
-  bool _isAmountToggleOn = false;
-  bool _isScheduleToggleOn = false;
   bool _hasNameError = false;
+  bool _hasValueError = false;
+  bool _hasUnitError = false;
+  bool _hasScheduleError = false;
 
   @override
   void initState() {
@@ -35,12 +35,8 @@ class TaskFormSheetState extends State<TaskFormSheet> {
     if (existing != null) {
       nameController.text = existing.name;
       selectedUnit = existing.frequency.unit;
-      selectedPeriod = existing.frequency.period;
       selectedDays = List.of(existing.frequency.days ?? []);
       timeController.text = existing.frequency.time?.toString() ?? "";
-      _isAmountToggleOn = existing.frequency.unit != null;
-      _isScheduleToggleOn =
-          existing.frequency.period != null || selectedDays.isNotEmpty;
     }
   }
 
@@ -74,11 +70,14 @@ class TaskFormSheetState extends State<TaskFormSheet> {
               nameField(),
               if (_hasNameError) errorMessage("Task name is needed"),
               const SizedBox(height: 16),
-              amountToggleRow(),
-              if (_isAmountToggleOn) amountFields(),
+              amountFields(),
+              if (_hasValueError)
+                errorMessage(
+                    "Value needs to be set and valid with a number without decimals"),
+              if (_hasUnitError) errorMessage("Unit needs to be selected"),
               const SizedBox(height: 16),
-              scheduleToggleRow(),
-              if (_isScheduleToggleOn) scheduleFields(),
+              if (_hasScheduleError) errorMessage("Days need to be selected"),
+              scheduleFields(),
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -110,24 +109,11 @@ class TaskFormSheetState extends State<TaskFormSheet> {
     );
   }
 
-// ------------------------ Set an amount
-  Row amountToggleRow() {
-    return Row(
-      children: [
-        message("Set an amount"),
-        const SizedBox(width: 8),
-        CupertinoSwitch(
-          value: _isAmountToggleOn,
-          activeTrackColor: Colors.black,
-          onChanged: (val) => setState(() => _isAmountToggleOn = val),
-        ),
-      ],
-    );
-  }
-
   Widget amountFields() {
     return Row(
       children: [
+        message("Amount per day: "),
+        const SizedBox(width: 8),
         SizedBox(
           width: 90,
           child: TextFormField(
@@ -156,42 +142,10 @@ class TaskFormSheetState extends State<TaskFormSheet> {
     );
   }
 
-// ------------------------ "Set a schedule"
-
-  Row scheduleToggleRow() {
-    return Row(
-      children: [
-        message("Set a schedule"),
-        const SizedBox(width: 8),
-        CupertinoSwitch(
-          value: _isScheduleToggleOn,
-          activeTrackColor: Colors.black,
-          onChanged: (val) => setState(() => _isScheduleToggleOn = val),
-        ),
-      ],
-    );
-  }
-
   Widget scheduleFields() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 8),
-        DropdownButtonFormField<Period>(
-          initialValue: selectedPeriod,
-          decoration: labelInput("Repeats per"),
-          isExpanded: true,
-          items: Period.values
-              .map((p) => DropdownMenuItem(
-                    value: p,
-                    child: message(capitalize(p.name)),
-                  ))
-              .toList(),
-          onChanged: (val) => setState(() => selectedPeriod = val),
-        ),
-        const SizedBox(height: 12),
-        message("Days"),
-        const SizedBox(height: 8),
         Wrap(
           spacing: 8,
           runSpacing: 4,
@@ -223,18 +177,24 @@ class TaskFormSheetState extends State<TaskFormSheet> {
   void _onConfirm() {
     setState(() {
       _hasNameError = nameController.text.trim().isEmpty;
+      _hasUnitError = selectedUnit == null;
+      _hasValueError = timeController.text.trim().isEmpty ||
+          int.tryParse(timeController.text) == null;
+      _hasScheduleError = selectedDays.isEmpty;
     });
 
-    if (_hasNameError) return;
+    if ((_hasNameError ||
+            _hasUnitError ||
+            _hasValueError ||
+            _hasScheduleError) ==
+        true) {
+      return;
+    }
 
     final frequency = Frequency(
-      unit: _isAmountToggleOn ? selectedUnit : null,
-      time: _isAmountToggleOn && timeController.text.isNotEmpty
-          ? int.tryParse(timeController.text)
-          : null,
-      period: _isScheduleToggleOn ? selectedPeriod : null,
-      days:
-          _isScheduleToggleOn && selectedDays.isNotEmpty ? selectedDays : null,
+      unit: selectedUnit,
+      time: int.tryParse(timeController.text),
+      days: selectedDays,
     );
 
     if (widget.viewModel.editingTask != null) {

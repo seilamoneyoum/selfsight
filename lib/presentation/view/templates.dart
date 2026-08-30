@@ -45,6 +45,15 @@ Text subtitleInterface(String title) {
   );
 }
 
+// Template du petit titre de l'interface
+Text smallTitleInterface(String title) {
+  return Text(
+    title,
+    style: GoogleFonts.poppins(
+        fontSize: 15, fontWeight: FontWeight.w300, color: Colors.grey[800]),
+  );
+}
+
 Text errorMessage(String text) {
   return Text(
     text,

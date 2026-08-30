@@ -134,10 +134,7 @@ class GoalFormState extends State<GoalForm> with AutomaticKeepAliveClientMixin {
           children: [
             Icon(getIcon(value)),
             const SizedBox(width: 8),
-            Text(
-              getLabel(value),
-              style: const TextStyle(fontSize: 13),
-            ),
+            message(getLabel(value)),
           ],
         ),
       );
@@ -334,9 +331,15 @@ class GoalFormState extends State<GoalForm> with AutomaticKeepAliveClientMixin {
             !_hasCategoryError &&
             !_hasPriorityError &&
             !_hasDateError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('New goal is added successfully ')),
-          );
+          if (viewModel.goalId == null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: message('New goal is added successfully ')),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: message('Goal is saved successfully')),
+            );
+          }
 
           if (viewModel.goal == null) {
             viewModel.addGoal(
@@ -347,7 +350,7 @@ class GoalFormState extends State<GoalForm> with AutomaticKeepAliveClientMixin {
           }
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Please fill all fields correctly')),
+            SnackBar(content: message('Please fill all fields correctly')),
           );
         }
       },
@@ -362,22 +365,22 @@ class GoalFormState extends State<GoalForm> with AutomaticKeepAliveClientMixin {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: const Text('Confirm Action'),
-              content: const Text(
+              title: subtitleInterface('Confirm Action'),
+              content: message(
                   'Are you sure you want to delete the goal? Once you delete this goal, there is no way of retrieving it.'),
               actions: <Widget>[
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: const Text('Cancel'),
+                  child: message('Cancel'),
                 ),
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                     viewModel.deleteGoal();
                   },
-                  child: const Text('Confirm'),
+                  child: message('Confirm'),
                 ),
               ],
             );
