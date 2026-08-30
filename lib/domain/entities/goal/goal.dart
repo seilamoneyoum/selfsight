@@ -8,7 +8,6 @@ class Goal {
   String? visionBoardPath;
   Progress progress;
   Category? category;
-  List<Task>? tasks;
   final String createAt;
 
   Goal(
@@ -16,7 +15,6 @@ class Goal {
       required this.title,
       this.visionBoardPath,
       required this.progress,
-      this.tasks,
       this.category,
       required this.createAt});
 
@@ -26,7 +24,6 @@ class Goal {
         'visionBoardPath': visionBoardPath,
         'progress': progress.toJson(),
         'category': category?.toString().split('.').last,
-        'tasks': tasks?.map((t) => t.toJson()).toList(),
         'createAt': createAt,
       };
 
@@ -38,9 +35,6 @@ class Goal {
         category: json['category'] != null
             ? Category.values.firstWhere(
                 (e) => e.toString().split('.').last == json['category'])
-            : null,
-        tasks: json['tasks'] != null
-            ? (json['tasks'] as List).map((t) => Task.fromJson(t)).toList()
             : null,
         createAt: json['createAt'],
       );

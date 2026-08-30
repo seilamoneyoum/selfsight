@@ -6,10 +6,14 @@ import 'package:selfsight/domain/entities/goal/category.dart';
 import 'package:selfsight/domain/entities/goal/goal.dart';
 import 'package:selfsight/domain/entities/goal/priority.dart';
 import 'package:selfsight/domain/entities/goal/progress.dart';
+import 'package:selfsight/domain/entities/task/frequency.dart';
+import 'package:selfsight/domain/entities/task/task.dart';
 import 'package:selfsight/presentation/app/app_setup.dart';
 import 'package:selfsight/presentation/view/goal/goal_form.dart';
 import 'package:selfsight/presentation/view/goal/goal_viewmodel.dart';
+import 'package:selfsight/presentation/view/goal/task/task_viewmodel.dart';
 import 'package:selfsight/services/goal_service.dart';
+import 'package:selfsight/services/task_service.dart';
 import 'package:stacked_services/stacked_services.dart';
 
 // Mocks
@@ -17,23 +21,33 @@ class MockNavigationService extends Mock implements NavigationService {}
 
 class MockGoalService extends Mock implements GoalService {}
 
-// Fake pour registerFallbackValue
+class MockTaskService extends Mock implements TaskService {}
+
+// Fakes pour registerFallbackValue
 class FakeGoal extends Fake implements Goal {}
+
+class FakeTask extends Fake implements Task {}
 
 void main() {
   late MockNavigationService mockNavigationService;
   late MockGoalService mockGoalService;
+  late MockTaskService mockTaskService;
 
   setUpAll(() {
     registerFallbackValue(FakeGoal());
+    registerFallbackValue(FakeTask());
   });
 
   setUp(() {
     mockNavigationService = MockNavigationService();
     mockGoalService = MockGoalService();
+    mockTaskService = MockTaskService();
 
     locator.registerSingleton<NavigationService>(mockNavigationService);
     locator.registerSingleton<GoalService>(mockGoalService);
+    locator.registerSingleton<TaskService>(mockTaskService);
+
+    when(() => mockTaskService.saveTask(any())).thenAnswer((_) async {});
   });
 
   tearDown(() {
@@ -41,10 +55,10 @@ void main() {
   });
 
   // Helpers
-  Widget buildGoalForm(GoalViewModel viewModel) {
+  Widget buildGoalForm(GoalViewModel viewModel, TaskViewModel taskViewModel) {
     return MaterialApp(
       home: Scaffold(
-        body: GoalForm(viewModel: viewModel),
+        body: GoalForm(viewModel: viewModel, taskViewModel: taskViewModel),
       ),
     );
   }
@@ -113,7 +127,8 @@ void main() {
         when(() => mockGoalService.saveGoal(any<Goal>()))
             .thenAnswer((_) async {});
         final viewModel = GoalViewModel();
-        await tester.pumpWidget(buildGoalForm(viewModel));
+        final taskViewModel = TaskViewModel(goalId: null);
+        await tester.pumpWidget(buildGoalForm(viewModel, taskViewModel));
 
         await enterTitle(tester, 'Mon nouveau but');
         await selectCategory(tester, Category.healthFitness);
@@ -146,7 +161,8 @@ void main() {
         when(() => mockGoalService.saveGoal(any<Goal>()))
             .thenAnswer((_) async {});
         final viewModel = GoalViewModel();
-        await tester.pumpWidget(buildGoalForm(viewModel));
+        final taskViewModel = TaskViewModel(goalId: null);
+        await tester.pumpWidget(buildGoalForm(viewModel, taskViewModel));
 
         await enterTitle(tester, 'But avec accompli');
         await selectCategory(tester, Category.careerEducation);
@@ -178,7 +194,8 @@ void main() {
         when(() => mockGoalService.saveGoal(any<Goal>()))
             .thenAnswer((_) async {});
         final viewModel = GoalViewModel();
-        await tester.pumpWidget(buildGoalForm(viewModel));
+        final taskViewModel = TaskViewModel(goalId: null);
+        await tester.pumpWidget(buildGoalForm(viewModel, taskViewModel));
 
         await tapConfirmButton(tester);
         await tester.pumpAndSettle();
@@ -196,7 +213,8 @@ void main() {
         when(() => mockGoalService.saveGoal(any<Goal>()))
             .thenAnswer((_) async {});
         final viewModel = GoalViewModel();
-        await tester.pumpWidget(buildGoalForm(viewModel));
+        final taskViewModel = TaskViewModel(goalId: null);
+        await tester.pumpWidget(buildGoalForm(viewModel, taskViewModel));
 
         await enterTitle(tester, 'Titre uniquement');
         await selectCategory(tester, Category.finance);
@@ -216,7 +234,8 @@ void main() {
         when(() => mockGoalService.saveGoal(any<Goal>()))
             .thenAnswer((_) async {});
         final viewModel = GoalViewModel();
-        await tester.pumpWidget(buildGoalForm(viewModel));
+        final taskViewModel = TaskViewModel(goalId: null);
+        await tester.pumpWidget(buildGoalForm(viewModel, taskViewModel));
 
         // Generate errors
         await tapConfirmButton(tester);
@@ -245,7 +264,8 @@ void main() {
         when(() => mockGoalService.saveGoal(any<Goal>()))
             .thenAnswer((_) async {});
         final viewModel = GoalViewModel();
-        await tester.pumpWidget(buildGoalForm(viewModel));
+        final taskViewModel = TaskViewModel(goalId: null);
+        await tester.pumpWidget(buildGoalForm(viewModel, taskViewModel));
 
         await enterTitle(tester, 'Date invalide');
         await selectCategory(tester, Category.other);
@@ -273,7 +293,8 @@ void main() {
         when(() => mockGoalService.saveGoal(any<Goal>()))
             .thenAnswer((_) async {});
         final viewModel = GoalViewModel();
-        await tester.pumpWidget(buildGoalForm(viewModel));
+        final taskViewModel = TaskViewModel(goalId: null);
+        await tester.pumpWidget(buildGoalForm(viewModel, taskViewModel));
 
         await enterTitle(tester, 'Test date toggle');
         await selectCategory(tester, Category.healthFitness);
@@ -304,7 +325,8 @@ void main() {
         when(() => mockGoalService.saveGoal(any<Goal>()))
             .thenAnswer((_) async {});
         final viewModel = GoalViewModel();
-        await tester.pumpWidget(buildGoalForm(viewModel));
+        final taskViewModel = TaskViewModel(goalId: null);
+        await tester.pumpWidget(buildGoalForm(viewModel, taskViewModel));
 
         await enterTitle(tester, 'Test date toggle end');
         await selectCategory(tester, Category.careerEducation);
@@ -335,7 +357,8 @@ void main() {
         when(() => mockGoalService.saveGoal(any<Goal>()))
             .thenAnswer((_) async {});
         final viewModel = GoalViewModel();
-        await tester.pumpWidget(buildGoalForm(viewModel));
+        final taskViewModel = TaskViewModel(goalId: null);
+        await tester.pumpWidget(buildGoalForm(viewModel, taskViewModel));
 
         await enterTitle(tester, 'Test both toggles');
         await selectCategory(tester, Category.finance);
@@ -364,6 +387,81 @@ void main() {
     );
   });
 
+  // ==================== NEW GOAL + TASKS ====================
+
+  group('New goal with pending tasks', () {
+    testWidgets(
+      'When a new goal is confirmed with draft tasks pending, the tasks are committed under the new goalId',
+      (tester) async {
+        when(() => mockGoalService.saveGoal(any<Goal>()))
+            .thenAnswer((_) async {});
+        final viewModel = GoalViewModel();
+        final taskViewModel = TaskViewModel(goalId: null);
+
+        // Simule l'utilisateur ayant ajouté une tâche dans l'onglet Tasks
+        // avant même que le goal ne soit sauvegardé (tâche en brouillon).
+        await taskViewModel.addTask(
+          "Boire de l'eau",
+          Frequency(unit: Unit.count, time: 8, days: [Day.monday]),
+        );
+
+        await tester.pumpWidget(buildGoalForm(viewModel, taskViewModel));
+        await enterTitle(tester, 'But avec tâches');
+        await selectCategory(tester, Category.healthFitness);
+        await selectPriority(tester, Priority.medium);
+        await tapConfirmButton(tester);
+        await tester.pumpAndSettle();
+
+        final capturedTask =
+            verify(() => mockTaskService.saveTask(captureAny())).captured.single
+                as Task;
+        expect(capturedTask.name, "Boire de l'eau");
+        expect(capturedTask.goalId, viewModel.goalId);
+        expect(taskViewModel.goalId, viewModel.goalId);
+      },
+    );
+
+    testWidgets(
+      'When a new goal is confirmed with no tasks added, the task service is never called',
+      (tester) async {
+        when(() => mockGoalService.saveGoal(any<Goal>()))
+            .thenAnswer((_) async {});
+        final viewModel = GoalViewModel();
+        final taskViewModel = TaskViewModel(goalId: null);
+
+        await tester.pumpWidget(buildGoalForm(viewModel, taskViewModel));
+        await enterTitle(tester, 'But sans tâches');
+        await selectCategory(tester, Category.finance);
+        await selectPriority(tester, Priority.low);
+        await tapConfirmButton(tester);
+        await tester.pumpAndSettle();
+
+        verifyNever(() => mockTaskService.saveTask(any()));
+      },
+    );
+
+    testWidgets(
+      'When the form has errors, tasks are not committed even if drafts are pending',
+      (tester) async {
+        final viewModel = GoalViewModel();
+        final taskViewModel = TaskViewModel(goalId: null);
+        await taskViewModel.addTask(
+          'Marcher',
+          Frequency(unit: Unit.minutes, time: 30, days: [Day.tuesday]),
+        );
+
+        await tester.pumpWidget(buildGoalForm(viewModel, taskViewModel));
+        // Formulaire vide -> tapConfirmButton déclenchera des erreurs
+        await tapConfirmButton(tester);
+        await tester.pumpAndSettle();
+
+        verifyNever(() => mockGoalService.saveGoal(any<Goal>()));
+        verifyNever(() => mockTaskService.saveTask(any()));
+        expect(taskViewModel.goalId, isNull);
+      },
+    );
+  });
+
   // ==================== EXISTING GOAL ====================
 
   group('Existing goal', () {
@@ -378,12 +476,14 @@ void main() {
       ),
       category: Category.healthFitness,
       createAt: DateTime.now().toIso8601String(),
-      tasks: [],
       visionBoardPath: null,
     );
 
-    Future<GoalViewModel> setupExistingGoalViewModel(WidgetTester tester,
-        {Goal? overrideGoal}) async {
+    Future<GoalViewModel> setupExistingGoalViewModel(
+      WidgetTester tester, {
+      Goal? overrideGoal,
+      TaskViewModel? taskViewModel,
+    }) async {
       final goalToUse = overrideGoal ?? existingGoal;
       when(() => mockGoalService.getGoalById(goalToUse.id))
           .thenAnswer((_) async => goalToUse);
@@ -394,7 +494,9 @@ void main() {
 
       final viewModel = GoalViewModel(goalId: goalToUse.id);
       await viewModel.loadGoal();
-      await tester.pumpWidget(buildGoalForm(viewModel));
+      final resolvedTaskViewModel =
+          taskViewModel ?? TaskViewModel(goalId: goalToUse.id);
+      await tester.pumpWidget(buildGoalForm(viewModel, resolvedTaskViewModel));
       await tester.pumpAndSettle();
       return viewModel;
     }
@@ -625,6 +727,47 @@ void main() {
             .single as Goal;
         expect(captured.progress.startDate, isNull);
         expect(captured.progress.endDate, isNull);
+      },
+    );
+  });
+
+  // ==================== EXISTING GOAL + TASKS ====================
+
+  group('Existing goal with tasks', () {
+    final existingGoal = Goal(
+      id: 'existing_with_tasks_456',
+      title: 'But avec tâches déjà là',
+      progress: Progress(isAccomplished: false, priority: Priority.medium),
+      category: Category.healthFitness,
+      createAt: DateTime.now().toIso8601String(),
+      visionBoardPath: null,
+    );
+
+    testWidgets(
+      'When saving an existing goal, no draft-commit happens since tasks are already linked to the goal',
+      (tester) async {
+        when(() => mockGoalService.getGoalById(existingGoal.id))
+            .thenAnswer((_) async => existingGoal);
+        when(() => mockGoalService.updateGoal(any<Goal>()))
+            .thenAnswer((_) async {});
+
+        final viewModel = GoalViewModel(goalId: existingGoal.id);
+        await viewModel.loadGoal();
+
+        // Le TaskViewModel a déjà un goalId : ses tâches sont persistées
+        // directement au moment de l'ajout, pas en brouillon.
+        final taskViewModel = TaskViewModel(goalId: existingGoal.id);
+
+        await tester.pumpWidget(buildGoalForm(viewModel, taskViewModel));
+        await tester.pumpAndSettle();
+
+        await enterTitle(tester, 'But modifié avec tâches existantes');
+        await tapConfirmButton(tester);
+        await tester.pumpAndSettle();
+
+        // Aucun appel supplémentaire à saveTask ne doit se produire lors
+        // de la sauvegarde du goal : le commit ne concerne que les nouveaux goals.
+        verifyNever(() => mockTaskService.saveTask(any()));
       },
     );
   });

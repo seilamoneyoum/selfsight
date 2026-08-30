@@ -21,6 +21,13 @@ class _GoalViewState extends State<GoalView>
   late TabController _tabController;
   late PageController _pageController;
 
+  // Créé une seule fois via le `??=` dans build(), pas nichée dans un
+  // ViewModelBuilder par onglet : ça évite le problème d'ordre de
+  // construction entre onglets frères, et permet à GoalForm d'y accéder
+  // directement pour commiter les tâches en brouillon.
+  TaskViewModel? _taskViewModel;
+  bool _hasLoadedTasks = false;
+
   @override
   void initState() {
     super.initState();
@@ -50,10 +57,15 @@ class _GoalViewState extends State<GoalView>
   Widget build(BuildContext context) {
     final arg = ModalRoute.of(context)?.settings.arguments as GoalViewArguments;
 
-    return ViewModelBuilder.reactive(
+    _taskViewModel ??= TaskViewModel(goalId: arg.goalId);
+    if (!_hasLoadedTasks) {
+      _hasLoadedTasks = true;
+      _taskViewModel!.loadTasks();
+    }
+
+    return ViewModelBuilder<GoalViewModel>.reactive(
       viewModelBuilder: () => GoalViewModel(goalId: arg.goalId),
-      onViewModelReady: (viewModel) =>
-          {viewModel as GoalViewModel, viewModel.loadGoal()},
+      onViewModelReady: (viewModel) => viewModel.loadGoal(),
       builder: (context, viewModel, child) {
         return Scaffold(
           appBar: AppBar(
@@ -70,23 +82,18 @@ class _GoalViewState extends State<GoalView>
             controller: _pageController,
             physics: const NeverScrollableScrollPhysics(),
             children: [
-              _goalFormContainer(viewModel as GoalViewModel),
+              _goalFormContainer(viewModel, _taskViewModel!),
               _visionBoardContainer(),
-              _tasksHandlerContainer(arg.goalId),
+              ListenableBuilder(
+                listenable: _taskViewModel!,
+                builder: (context, _) => TaskWidget(viewModel: _taskViewModel!),
+              ),
             ],
           ),
         );
       },
     );
   }
-}
-
-ViewModelBuilder<TaskViewModel> _tasksHandlerContainer(String? goalId) {
-  return ViewModelBuilder.reactive(
-    viewModelBuilder: () => TaskViewModel(goalId: goalId),
-    builder: (context, visionBoardVM, child) =>
-        TaskWidget(viewModel: visionBoardVM),
-  );
 }
 
 ViewModelBuilder<VisionBoardViewModel> _visionBoardContainer() {
@@ -97,16 +104,17 @@ ViewModelBuilder<VisionBoardViewModel> _visionBoardContainer() {
   );
 }
 
-Container _goalFormContainer(GoalViewModel viewModel) {
+Container _goalFormContainer(
+    GoalViewModel viewModel, TaskViewModel taskViewModel) {
   return Container(
-    margin: EdgeInsets.all(16.0),
+    margin: const EdgeInsets.all(16.0),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 20.0),
         Expanded(
           child: SingleChildScrollView(
-            child: GoalForm(viewModel: viewModel),
+            child: GoalForm(viewModel: viewModel, taskViewModel: taskViewModel),
           ),
         ),
       ],

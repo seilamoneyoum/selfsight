@@ -2,6 +2,7 @@ import 'package:selfsight/presentation/app/app.router.dart';
 import 'package:selfsight/presentation/app/app_setup.dart';
 import 'package:stacked/stacked.dart';
 import 'package:selfsight/services/goal_service.dart';
+import 'package:selfsight/services/task_service.dart';
 import 'package:selfsight/domain/entities/goal/goal.dart';
 import 'package:selfsight/domain/entities/goal/category.dart';
 import 'package:selfsight/domain/entities/goal/progress.dart';
@@ -10,6 +11,7 @@ import 'package:stacked_services/stacked_services.dart';
 class GoalViewModel extends BaseViewModel {
   final _navigationService = locator<NavigationService>();
   final _goalService = locator<GoalService>();
+  final _taskService = locator<TaskService>();
 
   String? goalId;
   GoalViewModel({this.goalId});
@@ -17,7 +19,6 @@ class GoalViewModel extends BaseViewModel {
   Goal? _goal;
   Goal? get goal => _goal;
 
-  /// Charger l'objectif existant sur l'interface
   Future<void> loadGoal() async {
     if (goalId != null) {
       setBusy(true);
@@ -27,8 +28,9 @@ class GoalViewModel extends BaseViewModel {
     }
   }
 
-  /// Ajouter un nouveau objectif
-  /// - Sans tâches et vision board définis pour le moment [À modifier plus tard]
+  /// Ajouter un nouveau objectif.
+  /// Les tâches ne sont pas stockées ici : Task.goalId est la seule
+  /// référence entre une tâche et son objectif (voir TaskService).
   Future<void> addGoal(
       String title, Category category, Progress progress) async {
     _goal = Goal(
@@ -37,7 +39,6 @@ class GoalViewModel extends BaseViewModel {
       visionBoardPath: null,
       progress: progress,
       category: category,
-      tasks: [],
       createAt: DateTime.now().toIso8601String(),
     );
 
@@ -48,14 +49,14 @@ class GoalViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  /// Effacer l'objectif existant (et retourner à la page d'accueil)
+  /// Effacer l'objectif existant, ainsi que toutes ses tâches associées
   Future<void> deleteGoal() async {
+    await _taskService.deleteTasksByGoalId(goalId!);
     await _goalService.deleteGoal(goalId!);
     goalId = null;
     navigateToHomeGoalView();
   }
 
-  /// Mise à jour d'un objectif existant
   Future<void> updateGoal(
       String title, Category category, Progress progress) async {
     _goal?.category = category;
@@ -65,7 +66,6 @@ class GoalViewModel extends BaseViewModel {
     await _goalService.updateGoal(_goal!);
   }
 
-  // Navigation
   Future<void> navigateToHomeGoalView() async {
     await _navigationService.navigateTo(Routes.homeView);
   }

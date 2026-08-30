@@ -6,11 +6,17 @@ import 'package:selfsight/domain/entities/goal/progress.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:selfsight/presentation/view/templates.dart';
 import 'package:selfsight/presentation/view/goal/goal_viewmodel.dart';
+import 'package:selfsight/presentation/view/goal/task/task_viewmodel.dart';
 
 class GoalForm extends StatefulWidget {
   final GoalViewModel viewModel;
+  final TaskViewModel taskViewModel;
 
-  const GoalForm({required this.viewModel, super.key});
+  const GoalForm({
+    required this.viewModel,
+    required this.taskViewModel,
+    super.key,
+  });
 
   @override
   GoalFormState createState() {
@@ -38,7 +44,6 @@ class GoalFormState extends State<GoalForm> with AutomaticKeepAliveClientMixin {
 
   Object? _loadedGoalId;
 
-  /// Appelée une seule fois, donc la première fois que ce GoalForm apparaît à l'écran
   @override
   void initState() {
     super.initState();
@@ -46,7 +51,6 @@ class GoalFormState extends State<GoalForm> with AutomaticKeepAliveClientMixin {
     _updateFieldsFromGoal();
   }
 
-  /// Appelée quand le widget parent reconstruit ce GoalForm avec une nouvelle instance du widget
   @override
   void didUpdateWidget(covariant GoalForm oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -104,7 +108,8 @@ class GoalFormState extends State<GoalForm> with AutomaticKeepAliveClientMixin {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              confirmButton(_formKey, context, widget.viewModel),
+              confirmButton(
+                  _formKey, context, widget.viewModel, widget.taskViewModel),
               if (widget.viewModel.goal != null) deleteButton(widget.viewModel)
             ],
           )
@@ -303,9 +308,10 @@ class GoalFormState extends State<GoalForm> with AutomaticKeepAliveClientMixin {
     GlobalKey<FormState> formKey,
     BuildContext context,
     GoalViewModel viewModel,
+    TaskViewModel taskViewModel,
   ) {
     return ElevatedButton(
-      onPressed: () {
+      onPressed: () async {
         bool isValid = formKey.currentState!.validate();
         if (isValid) {
           formKey.currentState!.save();
@@ -331,23 +337,29 @@ class GoalFormState extends State<GoalForm> with AutomaticKeepAliveClientMixin {
             !_hasCategoryError &&
             !_hasPriorityError &&
             !_hasDateError) {
-          if (viewModel.goalId == null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: message('New goal is added successfully ')),
-            );
+          final bool isNewGoal = viewModel.goal == null;
+
+          if (isNewGoal) {
+            await viewModel.addGoal(
+                titleController.text, selectedCategory!, selectedProgress);
+            // Le goal vient d'obtenir un id : on commite les tâches qui
+            // étaient en brouillon dans TaskViewModel (ajoutées avant que
+            // le goal n'existe). Sans effet si aucune tâche n'a été ajoutée.
+            await taskViewModel.commitDraftTasks(viewModel.goalId!);
           } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: message('Goal is saved successfully')),
-            );
+            await viewModel.updateGoal(
+                titleController.text, selectedCategory!, selectedProgress);
           }
 
-          if (viewModel.goal == null) {
-            viewModel.addGoal(
-                titleController.text, selectedCategory!, selectedProgress);
-          } else {
-            viewModel.updateGoal(
-                titleController.text, selectedCategory!, selectedProgress);
-          }
+          if (!context.mounted) return;
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: message(isNewGoal
+                  ? 'New goal is added successfully '
+                  : 'Goal is saved successfully'),
+            ),
+          );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: message('Please fill all fields correctly')),

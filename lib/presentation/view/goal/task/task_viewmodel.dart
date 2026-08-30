@@ -96,4 +96,28 @@ class TaskViewModel extends BaseViewModel {
     }
     notifyListeners();
   }
+
+  /// Appelée une fois que le goal parent vient d'être sauvegardé pour la
+  /// première fois. Assigne le nouveau goalId aux tâches en brouillon
+  /// (ajoutées avant que le goal n'existe) et les persiste.
+  Future<void> commitDraftTasks(String newGoalId) async {
+    if (goalId != null) return; // déjà associé à un goal existant
+
+    goalId = newGoalId;
+    final draftTasks = List<Task>.from(_tasks);
+    _tasks = [];
+
+    for (final draft in draftTasks) {
+      final committed = Task(
+        id: draft.id,
+        goalId: newGoalId,
+        name: draft.name,
+        frequency: draft.frequency,
+      );
+      await _taskService.saveTask(committed);
+      _tasks.add(committed);
+    }
+
+    notifyListeners();
+  }
 }
