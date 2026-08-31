@@ -60,6 +60,13 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  Future<void> selectAmount(WidgetTester tester, Amount amount) async {
+    await tester.tap(find.byType(DropdownButtonFormField<Amount>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(capitalize(amount.name)).last);
+    await tester.pumpAndSettle();
+  }
+
   Future<void> enterValue(WidgetTester tester, String value) async {
     await tester.enterText(find.byType(TextFormField).at(1), value);
     await tester.pumpAndSettle();
@@ -93,6 +100,7 @@ void main() {
       expect(find.text(text), findsNothing);
 
   const errNom = 'Task name is needed';
+  const errAmount = 'Type of amount needs to be selected';
   const errValeur =
       'Value needs to be set and valid with a number without decimals';
   const errUnite = 'Unit needs to be selected';
@@ -102,7 +110,7 @@ void main() {
 
   group('New task - goal not yet saved (goalId == null)', () {
     testWidgets(
-      '1. Filling name, value, unit and days adds the task to the list and closes the form',
+      '1.1 Filling name, amount (day), value, unit and days adds the task to the list and closes the form',
       (tester) async {
         // Arrange
         final viewModel = TaskViewModel(goalId: null);
@@ -112,27 +120,113 @@ void main() {
         // Act
         await enterName(tester, "Boire de l'eau");
         await enterValue(tester, '8');
+        await selectAmount(tester, Amount.day);
         await selectUnit(tester, Unit.count);
         await toggleDay(tester, Day.monday);
         await tapConfirmButton(tester);
 
         // Assert
+        Frequency frequency = Frequency(
+          amount: Amount.day,
+          unit: Unit.count,
+          days: [Day.monday],
+          time: 8,
+        );
         expect(find.text("Boire de l'eau"), findsOneWidget);
+        expect(find.text(frequencySummary(frequency)), findsOneWidget);
         expect(find.byType(TaskFormSheet), findsNothing);
         verifyNever(() => mockTaskService.saveTask(any()));
       },
     );
 
     testWidgets(
-      '2. Submitting the form empty shows the 4 error messages and does not add a task',
+      '1.2 Filling name, amount (week), value, unit and days adds the task to the list and closes the form',
       (tester) async {
+        // Arrange
         final viewModel = TaskViewModel(goalId: null);
         await tester.pumpWidget(buildTaskWidget(viewModel));
         await openAddForm(tester);
 
+        // Act
+        await enterName(tester, "Boire de l'eau");
+        await enterValue(tester, '8');
+        await selectAmount(tester, Amount.week);
+        await selectUnit(tester, Unit.count);
         await tapConfirmButton(tester);
 
+        // Assert
+        Frequency frequency = Frequency(
+          amount: Amount.week,
+          unit: Unit.count,
+          time: 8,
+        );
+        expect(find.text("Boire de l'eau"), findsOneWidget);
+        expect(find.text(frequencySummary(frequency)), findsOneWidget);
+        expect(find.byType(TaskFormSheet), findsNothing);
+        verifyNever(() => mockTaskService.saveTask(any()));
+      },
+    );
+
+    testWidgets(
+      '2. Submitting the form empty shows three error messages and does not add a task',
+      (tester) async {
+        // Arrange
+        final viewModel = TaskViewModel(goalId: null);
+        await tester.pumpWidget(buildTaskWidget(viewModel));
+
+        // Act
+        await openAddForm(tester);
+        await tapConfirmButton(tester);
+
+// Assert
         expectErrorMessage(errNom);
+        expectErrorMessage(errAmount);
+        expectErrorMessage(errValeur);
+        expectErrorMessage(errUnite);
+        expectNoErrorMessage(errJours);
+        expect(viewModel.tasks, isEmpty);
+        verifyNever(() => mockTaskService.saveTask(any()));
+      },
+    );
+
+    testWidgets(
+      '3.1 (Amount: week) Submitting the form almost empty shows error messages and does not add a task',
+      (tester) async {
+        // Arrange
+        final viewModel = TaskViewModel(goalId: null);
+        await tester.pumpWidget(buildTaskWidget(viewModel));
+
+        // Act
+        await openAddForm(tester);
+        await selectAmount(tester, Amount.week);
+        await tapConfirmButton(tester);
+
+        // Assert
+        expectErrorMessage(errNom);
+        expectNoErrorMessage(errAmount);
+        expectErrorMessage(errValeur);
+        expectErrorMessage(errUnite);
+        expectNoErrorMessage(errJours);
+        expect(viewModel.tasks, isEmpty);
+        verifyNever(() => mockTaskService.saveTask(any()));
+      },
+    );
+
+    testWidgets(
+      '3.2 (Amount: day) Submitting the form almost empty shows error messages and does not add a task',
+      (tester) async {
+        // Arrange
+        final viewModel = TaskViewModel(goalId: null);
+        await tester.pumpWidget(buildTaskWidget(viewModel));
+
+        // Act
+        await openAddForm(tester);
+        await selectAmount(tester, Amount.day);
+        await tapConfirmButton(tester);
+
+        // Assert
+        expectErrorMessage(errNom);
+        expectNoErrorMessage(errAmount);
         expectErrorMessage(errValeur);
         expectErrorMessage(errUnite);
         expectErrorMessage(errJours);
@@ -142,21 +236,31 @@ void main() {
     );
 
     testWidgets(
-      '2.1 After the 4 errors are shown, filling everything correctly adds the task and clears the errors',
+      '4. After the errors are shown, filling everything correctly adds the task and clears the errors',
       (tester) async {
         final viewModel = TaskViewModel(goalId: null);
         await tester.pumpWidget(buildTaskWidget(viewModel));
         await openAddForm(tester);
 
-        await tapConfirmButton(tester); // génère les 4 erreurs
+        await tapConfirmButton(tester);
         expectErrorMessage(errNom);
+        expectErrorMessage(errAmount);
+        expectErrorMessage(errValeur);
+        expectErrorMessage(errUnite);
+        expectNoErrorMessage(errJours);
 
         await enterName(tester, 'Marcher');
+        await selectAmount(tester, Amount.day);
         await enterValue(tester, '30');
         await selectUnit(tester, Unit.minutes);
         await toggleDay(tester, Day.tuesday);
         await tapConfirmButton(tester);
 
+        expectNoErrorMessage(errNom);
+        expectNoErrorMessage(errAmount);
+        expectNoErrorMessage(errValeur);
+        expectNoErrorMessage(errUnite);
+        expectNoErrorMessage(errJours);
         expect(find.text('Marcher'), findsOneWidget);
         expect(viewModel.tasks.length, 1);
         verifyNever(() => mockTaskService.saveTask(any()));
@@ -164,13 +268,14 @@ void main() {
     );
 
     testWidgets(
-      '3.1 An invalid decimal value shows only the value error',
+      '5.1 An invalid decimal value shows only the value error',
       (tester) async {
         final viewModel = TaskViewModel(goalId: null);
         await tester.pumpWidget(buildTaskWidget(viewModel));
         await openAddForm(tester);
 
         await enterName(tester, 'Yoga');
+        await selectAmount(tester, Amount.day);
         await enterValue(tester, '12.43');
         await selectUnit(tester, Unit.minutes);
         await toggleDay(tester, Day.wednesday);
@@ -185,13 +290,14 @@ void main() {
     );
 
     testWidgets(
-      '3.2 A value containing letters shows only the value error',
+      '5.2 A value containing letters shows only the value error',
       (tester) async {
         final viewModel = TaskViewModel(goalId: null);
         await tester.pumpWidget(buildTaskWidget(viewModel));
         await openAddForm(tester);
 
         await enterName(tester, 'Yoga');
+        await selectAmount(tester, Amount.day);
         await enterValue(tester, '1dd2');
         await selectUnit(tester, Unit.minutes);
         await toggleDay(tester, Day.wednesday);
@@ -212,7 +318,11 @@ void main() {
         final viewModel = TaskViewModel(goalId: null);
         await viewModel.addTask(
           'Tâche originale',
-          Frequency(unit: Unit.minutes, time: 15, days: [Day.monday]),
+          Frequency(
+              unit: Unit.minutes,
+              amount: Amount.day,
+              time: 15,
+              days: [Day.monday]),
         );
         await tester.pumpWidget(buildTaskWidget(viewModel));
         await tester.pumpAndSettle();
@@ -236,7 +346,11 @@ void main() {
         final viewModel = TaskViewModel(goalId: null);
         await viewModel.addTask(
           'Ancien nom',
-          Frequency(unit: Unit.minutes, time: 15, days: [Day.monday]),
+          Frequency(
+              unit: Unit.minutes,
+              amount: Amount.day,
+              time: 15,
+              days: [Day.monday]),
         );
         await tester.pumpWidget(buildTaskWidget(viewModel));
         await tester.pumpAndSettle();
@@ -244,13 +358,20 @@ void main() {
         await openEditForm(tester);
         await enterName(tester, 'Nouveau nom');
         await enterValue(tester, '45');
+        await selectAmount(tester, Amount.day);
         await selectUnit(tester, Unit.hours);
-        await toggleDay(tester, Day.monday); // décoche
-        await toggleDay(tester, Day.friday); // coche
+        await toggleDay(tester, Day.monday);
+        await toggleDay(tester, Day.friday);
         await tapConfirmButton(tester);
 
         expect(find.text('Nouveau nom'), findsOneWidget);
-        expect(viewModel.tasks.first.name, 'Nouveau nom');
+        expect(
+            find.text(frequencySummary(Frequency(
+                unit: Unit.hours,
+                amount: Amount.day,
+                time: 45,
+                days: [Day.friday]))),
+            findsOneWidget);
         verifyNever(() => mockTaskService.updateTask(any()));
       },
     );
@@ -269,11 +390,13 @@ void main() {
 
       await enterName(tester, 'Lire');
       await enterValue(tester, '20');
+      await selectAmount(tester, Amount.day);
       await selectUnit(tester, Unit.minutes);
       await toggleDay(tester, Day.sunday);
       await tapConfirmButton(tester);
 
       expect(find.text('Lire'), findsOneWidget);
+
       verify(() => mockTaskService.saveTask(any())).called(1);
     });
 
@@ -282,13 +405,21 @@ void main() {
       final viewModel = TaskViewModel(goalId: goalId);
       await viewModel.addTask(
         'Ancien nom',
-        Frequency(unit: Unit.minutes, time: 15, days: [Day.monday]),
+        Frequency(
+            unit: Unit.minutes,
+            amount: Amount.day,
+            time: 15,
+            days: [Day.monday]),
       );
       await tester.pumpWidget(buildTaskWidget(viewModel));
       await tester.pumpAndSettle();
 
       await openEditForm(tester);
       await enterName(tester, 'Nouveau nom');
+      await enterValue(tester, '20');
+      await selectAmount(tester, Amount.day);
+      await selectUnit(tester, Unit.minutes);
+      await toggleDay(tester, Day.sunday);
       await tapConfirmButton(tester);
 
       expect(find.text('Nouveau nom'), findsOneWidget);

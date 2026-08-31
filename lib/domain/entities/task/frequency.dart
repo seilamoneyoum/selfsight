@@ -1,15 +1,19 @@
 enum Unit { minutes, hours, count }
 
+enum Amount { day, week }
+
 enum Day { monday, tuesday, wednesday, thursday, friday, saturday, sunday }
 
 class Frequency {
-  final Unit? unit;
-  final List<Day>? days;
-  final int? time;
+  Unit? unit;
+  Amount? amount;
+  List<Day>? days;
+  int? time;
 
-  Frequency({this.unit, this.days, this.time});
+  Frequency({this.unit, this.amount, this.days, this.time});
   Map<String, dynamic> toJson() => {
         'unit': unit?.toString().split('.').last,
+        'amount': amount?.toString().split('.').last,
         'days': days?.map((e) => e.toString().split('.').last).toList(),
         'time': time,
       };
@@ -18,6 +22,10 @@ class Frequency {
         unit: json['unit'] != null
             ? Unit.values
                 .firstWhere((e) => e.toString().split('.').last == json['unit'])
+            : null,
+        amount: json['amount'] != null
+            ? Amount.values.firstWhere(
+                (e) => e.toString().split('.').last == json['amount'])
             : null,
         days: json['days'] != null
             ? (json['days'] as List)

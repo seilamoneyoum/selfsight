@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:selfsight/domain/entities/task/frequency.dart';
@@ -17,13 +16,17 @@ class TaskFormSheet extends StatefulWidget {
 
 class TaskFormSheetState extends State<TaskFormSheet> {
   final _formKey = GlobalKey<FormState>();
+
   final TextEditingController nameController = TextEditingController();
   final TextEditingController timeController = TextEditingController();
-
   Unit? selectedUnit;
+  Amount? selectedAmount;
   List<Day> selectedDays = [];
 
+  bool _isAmountPerDaySelected = false;
+
   bool _hasNameError = false;
+  bool _hasAmountError = false;
   bool _hasValueError = false;
   bool _hasUnitError = false;
   bool _hasScheduleError = false;
@@ -35,6 +38,10 @@ class TaskFormSheetState extends State<TaskFormSheet> {
     if (existing != null) {
       nameController.text = existing.name;
       selectedUnit = existing.frequency.unit;
+      selectedAmount = existing.frequency.amount;
+      if (selectedAmount == Amount.day) {
+        _isAmountPerDaySelected = true;
+      }
       selectedDays = List.of(existing.frequency.days ?? []);
       timeController.text = existing.frequency.time?.toString() ?? "";
     }
@@ -70,14 +77,17 @@ class TaskFormSheetState extends State<TaskFormSheet> {
               nameField(),
               if (_hasNameError) errorMessage("Task name is needed"),
               const SizedBox(height: 16),
+              if (_hasAmountError)
+                errorMessage("Type of amount needs to be selected"),
               amountFields(),
               if (_hasValueError)
                 errorMessage(
                     "Value needs to be set and valid with a number without decimals"),
               if (_hasUnitError) errorMessage("Unit needs to be selected"),
               const SizedBox(height: 16),
-              if (_hasScheduleError) errorMessage("Days need to be selected"),
-              scheduleFields(),
+              if (_hasScheduleError && _isAmountPerDaySelected)
+                errorMessage("Days need to be selected"),
+              if (_isAmountPerDaySelected) scheduleFields(),
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -112,7 +122,27 @@ class TaskFormSheetState extends State<TaskFormSheet> {
   Widget amountFields() {
     return Row(
       children: [
-        message("Amount per day: "),
+        Expanded(
+          child: DropdownButtonFormField<Amount>(
+            initialValue: selectedAmount,
+            decoration: labelInput("Amount per"),
+            isExpanded: true,
+            items: Amount.values
+                .map((amount) => DropdownMenuItem(
+                      value: amount,
+                      child: message(capitalize(amount.name)),
+                    ))
+                .toList(),
+            onChanged: (val) {
+              setState(() => selectedAmount = val);
+              if (selectedAmount == Amount.day) {
+                _isAmountPerDaySelected = true;
+              } else {
+                _isAmountPerDaySelected = false;
+              }
+            },
+          ),
+        ),
         const SizedBox(width: 8),
         SizedBox(
           width: 90,
@@ -130,9 +160,9 @@ class TaskFormSheetState extends State<TaskFormSheet> {
             decoration: labelInput("Unit"),
             isExpanded: true,
             items: Unit.values
-                .map((u) => DropdownMenuItem(
-                      value: u,
-                      child: message(capitalize(u.name)),
+                .map((unit) => DropdownMenuItem(
+                      value: unit,
+                      child: message(capitalize(unit.name)),
                     ))
                 .toList(),
             onChanged: (val) => setState(() => selectedUnit = val),
@@ -177,13 +207,16 @@ class TaskFormSheetState extends State<TaskFormSheet> {
   void _onConfirm() {
     setState(() {
       _hasNameError = nameController.text.trim().isEmpty;
+      _hasAmountError = selectedAmount == null;
       _hasUnitError = selectedUnit == null;
       _hasValueError = timeController.text.trim().isEmpty ||
           int.tryParse(timeController.text) == null;
       _hasScheduleError = selectedDays.isEmpty;
+      if (_isAmountPerDaySelected == false) _hasScheduleError = false;
     });
 
     if ((_hasNameError ||
+            _hasAmountError ||
             _hasUnitError ||
             _hasValueError ||
             _hasScheduleError) ==
@@ -191,10 +224,11 @@ class TaskFormSheetState extends State<TaskFormSheet> {
       return;
     }
 
-    final frequency = Frequency(
+    Frequency frequency = Frequency(
       unit: selectedUnit,
+      amount: selectedAmount,
       time: int.tryParse(timeController.text),
-      days: selectedDays,
+      days: _isAmountPerDaySelected ? selectedDays : null,
     );
 
     if (widget.viewModel.editingTask != null) {

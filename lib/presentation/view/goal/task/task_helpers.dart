@@ -25,8 +25,15 @@ String dayLabel(Day day) {
 String frequencySummary(Frequency frequency) {
   final List<String> parts = [];
 
-  if (frequency.time != null && frequency.unit != null) {
-    parts.add("${frequency.time} ${capitalize(frequency.unit!.name)}");
+  if (frequency.time != null &&
+      frequency.unit != null &&
+      frequency.amount != null) {
+    if (frequency.unit == Unit.count) {
+      parts.add("${frequency.time} times per ${frequency.amount!.name}");
+    } else {
+      parts.add(
+          "${frequency.time} ${frequency.unit!.name} per ${frequency.amount!.name}");
+    }
   }
   if (frequency.days != null && frequency.days!.isNotEmpty) {
     parts.add(frequency.days!.map(dayLabel).join(", "));
