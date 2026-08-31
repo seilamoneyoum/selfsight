@@ -28,6 +28,8 @@ class GoalFormState extends State<GoalForm> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
+  static const maxNbCharTitle = 60;
+
   final _formKey = GlobalKey<FormState>();
   final TextEditingController titleController = TextEditingController();
 
@@ -122,7 +124,8 @@ class GoalFormState extends State<GoalForm> with AutomaticKeepAliveClientMixin {
   TextFormField titleField() {
     return TextFormField(
       controller: titleController,
-      decoration: labelInput("Title"),
+      maxLength: maxNbCharTitle,
+      decoration: labelInput("Title").copyWith(counterText: ''),
       style: GoogleFonts.poppins(fontSize: 12),
     );
   }

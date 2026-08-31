@@ -15,6 +15,9 @@ class TaskFormSheet extends StatefulWidget {
 }
 
 class TaskFormSheetState extends State<TaskFormSheet> {
+  static const maxNbCharTitle = 60;
+  static const maxNbCharValue = 5;
+
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController nameController = TextEditingController();
@@ -114,18 +117,24 @@ class TaskFormSheetState extends State<TaskFormSheet> {
   TextFormField nameField() {
     return TextFormField(
       controller: nameController,
-      decoration: labelInput("Task name"),
+      maxLength: maxNbCharTitle,
+      decoration: labelInput("Task name").copyWith(counterText: ''),
       style: GoogleFonts.poppins(fontSize: 12),
     );
   }
 
   Widget amountFields() {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Expanded(
           child: DropdownButtonFormField<Amount>(
             initialValue: selectedAmount,
-            decoration: labelInput("Amount per"),
+            decoration: labelInput("Amount per").copyWith(
+              isDense: true,
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+            ),
             isExpanded: true,
             items: Amount.values
                 .map((amount) => DropdownMenuItem(
@@ -149,7 +158,13 @@ class TaskFormSheetState extends State<TaskFormSheet> {
           child: TextFormField(
             controller: timeController,
             keyboardType: TextInputType.number,
-            decoration: labelInput("Value"),
+            maxLength: maxNbCharValue,
+            decoration: labelInput("Value").copyWith(
+              counterText: '',
+              isDense: true,
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+            ),
             style: GoogleFonts.poppins(fontSize: 12),
           ),
         ),
@@ -157,7 +172,11 @@ class TaskFormSheetState extends State<TaskFormSheet> {
         Expanded(
           child: DropdownButtonFormField<Unit>(
             initialValue: selectedUnit,
-            decoration: labelInput("Unit"),
+            decoration: labelInput("Unit").copyWith(
+              isDense: true,
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+            ),
             isExpanded: true,
             items: Unit.values
                 .map((unit) => DropdownMenuItem(
