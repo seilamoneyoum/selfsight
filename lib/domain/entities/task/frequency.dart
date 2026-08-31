@@ -1,4 +1,4 @@
-enum Unit { minutes, hours, count }
+enum Unit { minute, hour, count }
 
 enum Amount { day, week }
 

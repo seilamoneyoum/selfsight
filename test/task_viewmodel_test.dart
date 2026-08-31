@@ -27,7 +27,7 @@ void main() {
   });
 
   final frequency = Frequency(
-      unit: Unit.minutes, amount: Amount.day, time: 20, days: [Day.monday]);
+      unit: Unit.minute, amount: Amount.day, time: 20, days: [Day.monday]);
 
   group('Goal not yet saved (goalId == null)', () {
     test('addTask adds the task locally without calling saveTask', () async {

@@ -8,7 +8,7 @@ import 'package:selfsight/presentation/view/templates.dart';
 class TaskFormSheet extends StatefulWidget {
   final TaskViewModel viewModel;
 
-  const TaskFormSheet({required this.viewModel});
+  const TaskFormSheet({super.key, required this.viewModel});
 
   @override
   State<TaskFormSheet> createState() => TaskFormSheetState();

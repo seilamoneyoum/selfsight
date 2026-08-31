@@ -27,12 +27,12 @@ class ImageLogic {
       if (file.existsSync()) {
         file.deleteSync();
       }
-    } catch (e) {}
-
-    viewModel.elements.removeWhere((item) => item.id == id);
-    viewModel.selectedId = "-1";
-    viewModel.selectedItem = null;
-    viewModel.notifyListeners();
+    } finally {
+      viewModel.elements.removeWhere((item) => item.id == id);
+      viewModel.selectedId = "-1";
+      viewModel.selectedItem = null;
+      viewModel.notifyListeners();
+    }
   }
 
   void resetRotation() {

@@ -252,7 +252,7 @@ void main() {
         await enterName(tester, 'Marcher');
         await selectAmount(tester, Amount.day);
         await enterValue(tester, '30');
-        await selectUnit(tester, Unit.minutes);
+        await selectUnit(tester, Unit.minute);
         await toggleDay(tester, Day.tuesday);
         await tapConfirmButton(tester);
 
@@ -277,7 +277,7 @@ void main() {
         await enterName(tester, 'Yoga');
         await selectAmount(tester, Amount.day);
         await enterValue(tester, '12.43');
-        await selectUnit(tester, Unit.minutes);
+        await selectUnit(tester, Unit.minute);
         await toggleDay(tester, Day.wednesday);
         await tapConfirmButton(tester);
 
@@ -299,7 +299,7 @@ void main() {
         await enterName(tester, 'Yoga');
         await selectAmount(tester, Amount.day);
         await enterValue(tester, '1dd2');
-        await selectUnit(tester, Unit.minutes);
+        await selectUnit(tester, Unit.minute);
         await toggleDay(tester, Day.wednesday);
         await tapConfirmButton(tester);
 
@@ -319,7 +319,7 @@ void main() {
         await viewModel.addTask(
           'Tâche originale',
           Frequency(
-              unit: Unit.minutes,
+              unit: Unit.minute,
               amount: Amount.day,
               time: 15,
               days: [Day.monday]),
@@ -347,7 +347,7 @@ void main() {
         await viewModel.addTask(
           'Ancien nom',
           Frequency(
-              unit: Unit.minutes,
+              unit: Unit.minute,
               amount: Amount.day,
               time: 15,
               days: [Day.monday]),
@@ -359,7 +359,7 @@ void main() {
         await enterName(tester, 'Nouveau nom');
         await enterValue(tester, '45');
         await selectAmount(tester, Amount.day);
-        await selectUnit(tester, Unit.hours);
+        await selectUnit(tester, Unit.hour);
         await toggleDay(tester, Day.monday);
         await toggleDay(tester, Day.friday);
         await tapConfirmButton(tester);
@@ -367,7 +367,7 @@ void main() {
         expect(find.text('Nouveau nom'), findsOneWidget);
         expect(
             find.text(frequencySummary(Frequency(
-                unit: Unit.hours,
+                unit: Unit.hour,
                 amount: Amount.day,
                 time: 45,
                 days: [Day.friday]))),
@@ -391,7 +391,7 @@ void main() {
       await enterName(tester, 'Lire');
       await enterValue(tester, '20');
       await selectAmount(tester, Amount.day);
-      await selectUnit(tester, Unit.minutes);
+      await selectUnit(tester, Unit.minute);
       await toggleDay(tester, Day.sunday);
       await tapConfirmButton(tester);
 
@@ -406,7 +406,7 @@ void main() {
       await viewModel.addTask(
         'Ancien nom',
         Frequency(
-            unit: Unit.minutes,
+            unit: Unit.minute,
             amount: Amount.day,
             time: 15,
             days: [Day.monday]),
@@ -418,7 +418,7 @@ void main() {
       await enterName(tester, 'Nouveau nom');
       await enterValue(tester, '20');
       await selectAmount(tester, Amount.day);
-      await selectUnit(tester, Unit.minutes);
+      await selectUnit(tester, Unit.minute);
       await toggleDay(tester, Day.sunday);
       await tapConfirmButton(tester);
 
@@ -431,7 +431,7 @@ void main() {
       final viewModel = TaskViewModel(goalId: goalId);
       await viewModel.addTask(
         'À supprimer',
-        Frequency(unit: Unit.minutes, time: 15, days: [Day.monday]),
+        Frequency(unit: Unit.minute, time: 15, days: [Day.monday]),
       );
       await tester.pumpWidget(buildTaskWidget(viewModel));
       await tester.pumpAndSettle();

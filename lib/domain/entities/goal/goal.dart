@@ -1,4 +1,3 @@
-import 'package:selfsight/domain/entities/task/task.dart';
 import 'package:selfsight/domain/entities/goal/progress.dart';
 import 'package:selfsight/domain/entities/goal/category.dart';
 

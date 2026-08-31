@@ -23,21 +23,25 @@ String dayLabel(Day day) {
 }
 
 String frequencySummary(Frequency frequency) {
-  final List<String> parts = [];
+  final parts = <String>[];
 
-  if (frequency.time != null &&
-      frequency.unit != null &&
-      frequency.amount != null) {
-    if (frequency.unit == Unit.count) {
-      parts.add("${frequency.time} times per ${frequency.amount!.name}");
-    } else {
-      parts.add(
-          "${frequency.time} ${frequency.unit!.name} per ${frequency.amount!.name}");
-    }
+  final time = frequency.time;
+  final unit = frequency.unit;
+  final amount = frequency.amount;
+  if (time != null && unit != null && amount != null) {
+    final baseWord = unit == Unit.count ? 'time' : unit.name;
+    final word = _pluralize(time, baseWord);
+    parts.add('$time $word per ${amount.name}');
   }
+
   if (frequency.days != null && frequency.days!.isNotEmpty) {
-    parts.add(frequency.days!.map(dayLabel).join(", "));
+    parts.add(frequency.days!.map(dayLabel).join(', '));
   }
 
-  return parts.isEmpty ? "No schedule set" : parts.join(" · ");
+  return parts.isEmpty ? 'No schedule set' : parts.join(' · ');
+}
+
+String _pluralize(int count, String singular, [String? plural]) {
+  if (count == 1) return singular;
+  return plural ?? '${singular}s';
 }

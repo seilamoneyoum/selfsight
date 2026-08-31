@@ -447,7 +447,7 @@ void main() {
         final taskViewModel = TaskViewModel(goalId: null);
         await taskViewModel.addTask(
           'Marcher',
-          Frequency(unit: Unit.minutes, time: 30, days: [Day.tuesday]),
+          Frequency(unit: Unit.minute, time: 30, days: [Day.tuesday]),
         );
 
         await tester.pumpWidget(buildGoalForm(viewModel, taskViewModel));
@@ -504,7 +504,7 @@ void main() {
     testWidgets(
       'When all fields are valid, tapping Save updates the goal with the same ID and shows no errors',
       (tester) async {
-        final viewModel = await setupExistingGoalViewModel(tester);
+        await setupExistingGoalViewModel(tester);
 
         await enterTitle(tester, 'But modifié');
         await selectCategory(tester, Category.careerEducation);
@@ -533,7 +533,7 @@ void main() {
     testWidgets(
       'When mandatory fields are valid and isAccomplished is checked, Save updates the goal and clears dates if toggles are off',
       (tester) async {
-        final viewModel = await setupExistingGoalViewModel(tester);
+        await setupExistingGoalViewModel(tester);
 
         await enterTitle(tester, 'But accompli');
         await selectCategory(tester, Category.finance);
@@ -567,7 +567,7 @@ void main() {
     testWidgets(
       'When all fields are cleared, Save shows three error messages and does not update the goal',
       (tester) async {
-        final viewModel = await setupExistingGoalViewModel(tester);
+        await setupExistingGoalViewModel(tester);
 
         await enterTitle(tester, '');
         final formState = tester.state<GoalFormState>(find.byType(GoalForm));
@@ -588,7 +588,7 @@ void main() {
     testWidgets(
       'When title and category are filled but priority is missing, Save shows a priority error and does not update',
       (tester) async {
-        final viewModel = await setupExistingGoalViewModel(tester);
+        await setupExistingGoalViewModel(tester);
 
         await enterTitle(tester, 'Titre conservé');
         await selectCategory(tester, Category.spiritualityReligion);
@@ -609,7 +609,7 @@ void main() {
     testWidgets(
       'After displaying errors, filling all fields correctly and saving clears errors and updates the goal',
       (tester) async {
-        final viewModel = await setupExistingGoalViewModel(tester);
+        await setupExistingGoalViewModel(tester);
 
         // Generate errors
         await enterTitle(tester, '');
@@ -643,7 +643,7 @@ void main() {
     testWidgets(
       'When end date is before start date, Save shows a date error and does not update the goal',
       (tester) async {
-        final viewModel = await setupExistingGoalViewModel(tester);
+        await setupExistingGoalViewModel(tester);
 
         await enterTitle(tester, 'Date invalide');
         await selectCategory(tester, Category.other);
@@ -692,7 +692,7 @@ void main() {
     testWidgets(
       'Deactivating an existing end date toggle sets endDate to null when saving',
       (tester) async {
-        final viewModel = await setupExistingGoalViewModel(tester);
+        await setupExistingGoalViewModel(tester);
 
         await toggleDateSwitch(tester, 'End date', turnOn: false);
         await tester.pumpAndSettle();
@@ -712,7 +712,7 @@ void main() {
     testWidgets(
       'Deactivating both existing date toggles sets both dates to null when saving',
       (tester) async {
-        final viewModel = await setupExistingGoalViewModel(tester);
+        await setupExistingGoalViewModel(tester);
 
         await toggleDateSwitch(tester, 'Start date', turnOn: false);
         await toggleDateSwitch(tester, 'End date', turnOn: false);
@@ -754,8 +754,6 @@ void main() {
         final viewModel = GoalViewModel(goalId: existingGoal.id);
         await viewModel.loadGoal();
 
-        // Le TaskViewModel a déjà un goalId : ses tâches sont persistées
-        // directement au moment de l'ajout, pas en brouillon.
         final taskViewModel = TaskViewModel(goalId: existingGoal.id);
 
         await tester.pumpWidget(buildGoalForm(viewModel, taskViewModel));

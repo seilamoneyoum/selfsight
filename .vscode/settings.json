@@ -4,12 +4,19 @@
         "buildlog",
         "buildscript",
         "dists",
+        "friday",
         "mockito",
+        "monday",
         "poppins",
+        "saturday",
         "selfsight",
+        "sunday",
         "swiftpm",
         "Symbolication",
-        "viewmodel"
+        "thursday",
+        "tuesday",
+        "viewmodel",
+        "wednesday"
     ],
     "cSpell.language": "en,fr"
 }

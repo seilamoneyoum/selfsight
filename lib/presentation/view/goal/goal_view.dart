@@ -10,7 +10,7 @@ import 'package:stacked/stacked.dart';
 
 class GoalView extends StatefulWidget {
   final String? goalId;
-  const GoalView({Key? key, this.goalId}) : super(key: key);
+  const GoalView({super.key, this.goalId});
 
   @override
   State<GoalView> createState() => _GoalViewState();
