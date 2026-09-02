@@ -8,7 +8,6 @@ selfsight est une application Flutter conçue pour vous aider à visualiser vos 
 
 *   Vision Board : Créez un tableau d'inspiration visuel en ajoutant des images et des textes pour matérialiser vos objectifs à long terme.
 *   Gestion des tâches : Décomposez vos visions en tâches claires et réalisables, et suivez leur état d'avancement.
-*   Statistiques de progression : Visualisez vos performances grâce à des graphiques et des indicateurs qui analysent votre productivité et votre évolution.
 
 ## Aperçu de l'application
 
