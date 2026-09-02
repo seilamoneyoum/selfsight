@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:selfsight/presentation/view/daily_tasks/daily_tasks_sheet.dart';
 import 'package:selfsight/presentation/view/home/home_viewmodel.dart';
 import 'package:stacked/stacked.dart';
 import 'package:selfsight/domain/entities/goal/category.dart';
@@ -25,7 +26,7 @@ class _HomeViewState extends State<HomeView> {
                     crossAxisCount: 2,
                     children: viewModel.goals.map((goal) {
                       return GestureDetector(
-                        onTap: () => viewModel.navigateToSpecificGoal(goal.id),
+                        onTap: () => showDailyTasksSheet(context, goal.id),
                         child: Container(
                           margin: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
