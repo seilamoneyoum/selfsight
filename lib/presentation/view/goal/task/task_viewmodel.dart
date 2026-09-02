@@ -20,7 +20,6 @@ class TaskViewModel extends BaseViewModel {
       _editingId != null ? _tasks.firstWhere((t) => t.id == _editingId) : null;
 
   /// Charger les tâches existantes liées à cet objectif.
-  /// Si le goal n'a pas encore été sauvegardé, il n'y a rien à charger.
   Future<void> loadTasks() async {
     if (goalId == null) return;
     try {
@@ -63,7 +62,7 @@ class TaskViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  /// Met à jour la tâche en édition. Persistée seulement si le goal est déjà sauvegardé.
+  /// Met à jour la tâche en édition.
   Future<void> updateTask(String name, Frequency frequency) async {
     if (_editingId == null) return;
 
@@ -85,7 +84,7 @@ class TaskViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  /// Supprime une tâche. Persistée seulement si le goal est déjà sauvegardé.
+  /// Supprime une tâche.
   Future<void> deleteTask(String id) async {
     if (goalId != null) {
       await _taskService.deleteTask(id);
@@ -94,30 +93,6 @@ class TaskViewModel extends BaseViewModel {
     if (_editingId == id) {
       _editingId = null;
     }
-    notifyListeners();
-  }
-
-  /// Appelée une fois que le goal parent vient d'être sauvegardé pour la
-  /// première fois. Assigne le nouveau goalId aux tâches en brouillon
-  /// (ajoutées avant que le goal n'existe) et les persiste.
-  Future<void> commitDraftTasks(String newGoalId) async {
-    if (goalId != null) return; // déjà associé à un goal existant
-
-    goalId = newGoalId;
-    final draftTasks = List<Task>.from(_tasks);
-    _tasks = [];
-
-    for (final draft in draftTasks) {
-      final committed = Task(
-        id: draft.id,
-        goalId: newGoalId,
-        name: draft.name,
-        frequency: draft.frequency,
-      );
-      await _taskService.saveTask(committed);
-      _tasks.add(committed);
-    }
-
     notifyListeners();
   }
 }

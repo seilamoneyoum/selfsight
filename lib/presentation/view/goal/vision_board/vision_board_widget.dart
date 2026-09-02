@@ -24,16 +24,23 @@ class _VisionBoardWidgetState extends State<VisionBoardWidget>
   Widget build(BuildContext context) {
     super.build(context);
     return SizedBox(
-        width: double.infinity,
-        child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              getBackgroundContainer(widget.viewModel, context),
-              widget.viewModel.alignImagesLogic.isAlignMode
-                  ? alignImagesContainer(context, widget.viewModel)
-                  : mainOptions(context)
-            ]));
+      width: double.infinity,
+      child: Column(
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          getBackgroundContainer(widget.viewModel, context),
+          widget.viewModel.alignImagesLogic.isAlignMode
+              ? alignImagesContainer(context, widget.viewModel)
+              : mainOptions(context),
+          const Spacer(),
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: saveButton(context, widget.viewModel),
+          ),
+        ],
+      ),
+    );
   }
 
   Column mainOptions(BuildContext context) {
@@ -46,13 +53,6 @@ class _VisionBoardWidgetState extends State<VisionBoardWidget>
               Column(
                 children: [
                   imageOptions(widget.viewModel),
-                  /*ElevatedButton(
-                    onPressed: () {
-                      widget.viewModel.alignImagesLogic
-                          .setAlignImagesMode(true);
-                    },
-                    child: message("Align images"),
-                  )*/
                 ],
               )
             ],
@@ -75,17 +75,20 @@ class _VisionBoardWidgetState extends State<VisionBoardWidget>
             ),
           ],
         ),
-        const SizedBox(height: 12),
-        saveButton(context, widget.viewModel),
       ],
     );
   }
 
   Widget saveButton(BuildContext context, VisionBoardViewModel viewModel) {
     return SizedBox(
+      width: 300,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(4.0),
+          ),
+          minimumSize: const Size(double.infinity, 48),
         ),
         onPressed: viewModel.isBusy
             ? null
@@ -96,16 +99,7 @@ class _VisionBoardWidgetState extends State<VisionBoardWidget>
                   SnackBar(content: message('Vision board saved successfully')),
                 );
               },
-        child: viewModel.isBusy
-            ? const SizedBox(
-                width: 18,
-                height: 18,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
-                ),
-              )
-            : message("Save"),
+        child: message("Save"),
       ),
     );
   }

@@ -6,15 +6,12 @@ import 'package:selfsight/domain/entities/goal/progress.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:selfsight/presentation/view/templates.dart';
 import 'package:selfsight/presentation/view/goal/goal_viewmodel.dart';
-import 'package:selfsight/presentation/view/goal/task/task_viewmodel.dart';
 
 class GoalForm extends StatefulWidget {
   final GoalViewModel viewModel;
-  final TaskViewModel taskViewModel;
 
   const GoalForm({
     required this.viewModel,
-    required this.taskViewModel,
     super.key,
   });
 
@@ -110,8 +107,7 @@ class GoalFormState extends State<GoalForm> with AutomaticKeepAliveClientMixin {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              confirmButton(
-                  _formKey, context, widget.viewModel, widget.taskViewModel),
+              confirmButton(_formKey, context, widget.viewModel),
               if (widget.viewModel.goal != null) deleteButton(widget.viewModel)
             ],
           )
@@ -307,12 +303,8 @@ class GoalFormState extends State<GoalForm> with AutomaticKeepAliveClientMixin {
     );
   }
 
-  ElevatedButton confirmButton(
-    GlobalKey<FormState> formKey,
-    BuildContext context,
-    GoalViewModel viewModel,
-    TaskViewModel taskViewModel,
-  ) {
+  ElevatedButton confirmButton(GlobalKey<FormState> formKey,
+      BuildContext context, GoalViewModel viewModel) {
     return ElevatedButton(
       onPressed: () async {
         bool isValid = formKey.currentState!.validate();
@@ -345,10 +337,6 @@ class GoalFormState extends State<GoalForm> with AutomaticKeepAliveClientMixin {
           if (isNewGoal) {
             await viewModel.addGoal(
                 titleController.text, selectedCategory!, selectedProgress);
-            // Le goal vient d'obtenir un id : on commite les tâches qui
-            // étaient en brouillon dans TaskViewModel (ajoutées avant que
-            // le goal n'existe). Sans effet si aucune tâche n'a été ajoutée.
-            await taskViewModel.commitDraftTasks(viewModel.goalId!);
           } else {
             await viewModel.updateGoal(
                 titleController.text, selectedCategory!, selectedProgress);

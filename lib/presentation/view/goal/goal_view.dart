@@ -11,7 +11,7 @@ import 'package:stacked/stacked.dart';
 
 class GoalView extends StatefulWidget {
   final String? goalId;
-  const GoalView({Key? key, this.goalId}) : super(key: key);
+  const GoalView({super.key, this.goalId});
 
   @override
   State<GoalView> createState() => _GoalViewState();
@@ -21,9 +21,6 @@ class _GoalViewState extends State<GoalView>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late PageController _pageController;
-
-  TaskViewModel? _taskViewModel;
-  bool _hasLoadedTasks = false;
 
   GoalViewModel? _goalViewModel;
 
@@ -60,12 +57,6 @@ class _GoalViewState extends State<GoalView>
   @override
   Widget build(BuildContext context) {
     final arg = ModalRoute.of(context)?.settings.arguments as GoalViewArguments;
-
-    _taskViewModel ??= TaskViewModel(goalId: arg.goalId);
-    if (!_hasLoadedTasks) {
-      _hasLoadedTasks = true;
-      _taskViewModel!.loadTasks();
-    }
 
     return ViewModelBuilder<GoalViewModel>.reactive(
       viewModelBuilder: () => GoalViewModel(goalId: arg.goalId),
@@ -118,16 +109,12 @@ class _GoalViewState extends State<GoalView>
               }
             },
             children: [
-              _goalFormContainer(viewModel, _taskViewModel!),
+              _goalFormContainer(viewModel),
               isInEditingMode
                   ? _visionBoardContainer(viewModel.goalId!)
                   : _tabLockedPlaceholder(),
               isInEditingMode
-                  ? ListenableBuilder(
-                      listenable: _taskViewModel!,
-                      builder: (context, _) =>
-                          TaskWidget(viewModel: _taskViewModel!),
-                    )
+                  ? _taskViewContainer(viewModel.goalId!)
                   : _tabLockedPlaceholder(),
             ],
           ),
@@ -135,6 +122,14 @@ class _GoalViewState extends State<GoalView>
       },
     );
   }
+}
+
+ViewModelBuilder<TaskViewModel> _taskViewContainer(String goalId) {
+  return ViewModelBuilder<TaskViewModel>.reactive(
+    viewModelBuilder: () => TaskViewModel(goalId: goalId),
+    onViewModelReady: (viewModel) => viewModel.loadTasks(),
+    builder: (context, tasksVM, child) => TaskWidget(viewModel: tasksVM),
+  );
 }
 
 ViewModelBuilder<VisionBoardViewModel> _visionBoardContainer(String goalId) {
@@ -162,8 +157,7 @@ Widget _tabLockedPlaceholder() {
   );
 }
 
-Container _goalFormContainer(
-    GoalViewModel viewModel, TaskViewModel taskViewModel) {
+Container _goalFormContainer(GoalViewModel viewModel) {
   return Container(
     margin: const EdgeInsets.all(16.0),
     child: Column(
@@ -172,7 +166,7 @@ Container _goalFormContainer(
         const SizedBox(height: 20.0),
         Expanded(
           child: SingleChildScrollView(
-            child: GoalForm(viewModel: viewModel, taskViewModel: taskViewModel),
+            child: GoalForm(viewModel: viewModel),
           ),
         ),
       ],

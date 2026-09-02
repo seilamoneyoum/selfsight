@@ -1,5 +1,6 @@
 import 'package:selfsight/presentation/app/app.router.dart';
 import 'package:selfsight/presentation/app/app_setup.dart';
+import 'package:selfsight/services/vision_board_service.dart';
 import 'package:stacked/stacked.dart';
 import 'package:selfsight/services/goal_service.dart';
 import 'package:selfsight/services/task_service.dart';
@@ -12,6 +13,7 @@ class GoalViewModel extends BaseViewModel {
   final _navigationService = locator<NavigationService>();
   final _goalService = locator<GoalService>();
   final _taskService = locator<TaskService>();
+  final _visionBoardService = locator<VisionBoardService>();
 
   String? goalId;
   GoalViewModel({this.goalId});
@@ -29,8 +31,6 @@ class GoalViewModel extends BaseViewModel {
   }
 
   /// Ajouter un nouveau objectif.
-  /// Les tâches ne sont pas stockées ici : Task.goalId est la seule
-  /// référence entre une tâche et son objectif (voir TaskService).
   Future<void> addGoal(
       String title, Category category, Progress progress) async {
     _goal = Goal(
@@ -53,6 +53,7 @@ class GoalViewModel extends BaseViewModel {
   Future<void> deleteGoal() async {
     await _taskService.deleteTasksByGoalId(goalId!);
     await _goalService.deleteGoal(goalId!);
+    await _visionBoardService.deleteVisionBoardByGoalId(goalId!);
     goalId = null;
     navigateToHomeGoalView();
   }
