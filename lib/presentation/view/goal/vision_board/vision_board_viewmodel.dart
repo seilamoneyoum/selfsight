@@ -155,4 +155,26 @@ class VisionBoardViewModel extends BaseViewModel {
 
     return Size(scaledWidth, scaledHeight);
   }
+
+// Déplace l'image sélectionnée d'un niveau vers l'avant
+  void bringForward(String id) {
+    int index = elements.indexWhere((item) => item.id == id);
+// Impossible d'avancer si l'on se trouve déjà tout en haut
+    if (index == -1 || index == elements.length - 1) return;
+
+    final item = elements.removeAt(index);
+    elements.insert(index + 1, item);
+    notifyListeners();
+  }
+
+  /// Déplace l'image sélectionnée d'un niveau vers l'arrière
+  void sendBackward(String id) {
+    int index = elements.indexWhere((item) => item.id == id);
+// Impossible de reculer si l'on se trouve déjà tout en bas
+    if (index == -1 || index == 0) return;
+
+    final item = elements.removeAt(index);
+    elements.insert(index - 1, item);
+    notifyListeners();
+  }
 }

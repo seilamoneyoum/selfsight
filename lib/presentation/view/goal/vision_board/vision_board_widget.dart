@@ -30,9 +30,7 @@ class _VisionBoardWidgetState extends State<VisionBoardWidget>
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           getBackgroundContainer(widget.viewModel, context),
-          widget.viewModel.alignImagesLogic.isAlignMode
-              ? alignImagesContainer(context, widget.viewModel)
-              : mainOptions(context),
+          mainOptions(context),
           const Spacer(),
           Padding(
             padding: const EdgeInsets.all(20.0),
@@ -45,6 +43,7 @@ class _VisionBoardWidgetState extends State<VisionBoardWidget>
 
   Column mainOptions(BuildContext context) {
     return Column(
+      spacing: 20,
       children: [
         if (widget.viewModel.selectedId != "-1")
           Row(
@@ -65,7 +64,7 @@ class _VisionBoardWidgetState extends State<VisionBoardWidget>
               onPressed: () {
                 widget.viewModel.pickMultipleImages();
               },
-              child: message("Add image"),
+              child: message("Add image(s)"),
             ),
             ElevatedButton(
               onPressed: () {
@@ -245,28 +244,46 @@ class _VisionBoardWidgetState extends State<VisionBoardWidget>
             viewModel.imageLogic.removeItem(viewModel.selectedId);
           },
           style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            shape: const CircleBorder(),
+            padding: EdgeInsets.zero,
+            fixedSize: const Size(40, 40),
           ),
-          child: const Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.delete_outline, size: 28),
-            ],
-          ),
+          child: const Icon(Icons.delete_outline, size: 20),
         ),
+        // Reset rotation
         ElevatedButton(
           onPressed: () {
             viewModel.imageLogic.resetRotation();
           },
           style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            shape: const CircleBorder(),
+            padding: EdgeInsets.zero,
+            fixedSize: const Size(40, 40),
           ),
-          child: const Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.rotate_right, size: 28),
-            ],
+          child: const Icon(Icons.rotate_right, size: 20),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            viewModel.bringForward(viewModel.selectedId);
+          },
+          style: ElevatedButton.styleFrom(
+            shape: const CircleBorder(),
+            padding: EdgeInsets.zero,
+            fixedSize: const Size(40, 40),
           ),
+          child: const Icon(Icons.arrow_upward, size: 20),
+        ),
+        // Send backward (down)
+        ElevatedButton(
+          onPressed: () {
+            viewModel.sendBackward(viewModel.selectedId);
+          },
+          style: ElevatedButton.styleFrom(
+            shape: const CircleBorder(),
+            padding: EdgeInsets.zero,
+            fixedSize: const Size(40, 40),
+          ),
+          child: const Icon(Icons.arrow_downward, size: 20),
         ),
       ],
     );

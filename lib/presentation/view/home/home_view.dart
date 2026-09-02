@@ -29,7 +29,7 @@ class _HomeViewState extends State<HomeView> {
                         child: Container(
                           margin: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.blue.shade100,
+                            color: const Color.fromARGB(255, 193, 173, 226),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Column(
@@ -38,7 +38,6 @@ class _HomeViewState extends State<HomeView> {
                               Icon(
                                 goal.category?.icon ?? Icons.category,
                                 size: 40,
-                                color: Colors.blue.shade700,
                               ),
                               const SizedBox(height: 8),
                               Text(
@@ -72,8 +71,6 @@ class _HomeViewState extends State<HomeView> {
             await viewModel.navigateToMainGoalView();
             viewModel.loadGoals();
           },
-          backgroundColor: Colors.black,
-          foregroundColor: Colors.white,
           child: const Icon(Icons.add),
         ),
       ),
