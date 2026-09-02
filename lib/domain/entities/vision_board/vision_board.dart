@@ -1,17 +1,40 @@
 import 'dart:ui';
-
-import 'package:flutter/material.dart';
-import 'package:selfsight/domain/entities/vision_board/vision_board_item.dart';
+import 'vision_board_item.dart';
 
 class VisionBoard {
-  final List<VisionBoardItem> items;
-  final Size boardSize;
-  final String snapshot;
+  final String goalId;
+  List<VisionBoardItem> items;
+  int? backgroundColorValue;
+  String? backgroundImagePath;
 
-  const VisionBoard(List list,
-      {required this.snapshot,
-      this.items = const [],
-      this.boardSize = const Size(1000, 1000)});
+  VisionBoard({
+    required this.goalId,
+    this.items = const [],
+    this.backgroundColorValue,
+    this.backgroundImagePath,
+  });
 
-  List<VisionBoardItem>? get elements => null;
+  factory VisionBoard.fromJson(Map<String, dynamic> json) {
+    return VisionBoard(
+      goalId: json['goalId'],
+      items: (json['items'] as List?)
+              ?.map((e) => VisionBoardItem.fromJson(e))
+              .toList() ??
+          [],
+      backgroundColorValue: json['backgroundColorValue'],
+      backgroundImagePath: json['backgroundImagePath'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'goalId': goalId,
+      'items': items.map((e) => e.toJson()).toList(),
+      'backgroundColorValue': backgroundColorValue,
+      'backgroundImagePath': backgroundImagePath,
+    };
+  }
+
+  static int? colorToInt(Color? color) => color?.value;
+  static Color? intToColor(int? value) => value != null ? Color(value) : null;
 }

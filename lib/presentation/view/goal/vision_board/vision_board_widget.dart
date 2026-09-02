@@ -46,19 +46,18 @@ class _VisionBoardWidgetState extends State<VisionBoardWidget>
               Column(
                 children: [
                   imageOptions(widget.viewModel),
-                  ElevatedButton(
+                  /*ElevatedButton(
                     onPressed: () {
                       widget.viewModel.alignImagesLogic
                           .setAlignImagesMode(true);
                     },
                     child: message("Align images"),
-                  )
+                  )*/
                 ],
               )
             ],
           ),
         Wrap(
-          // Ligne de boutons d'ajout d'image et de sélectionner le type de fond d'écran
           alignment: WrapAlignment.spaceBetween,
           spacing: 50,
           children: [
@@ -76,11 +75,43 @@ class _VisionBoardWidgetState extends State<VisionBoardWidget>
             ),
           ],
         ),
+        const SizedBox(height: 12),
+        saveButton(context, widget.viewModel),
       ],
     );
   }
 
-  // Affichage des images (lors du chargement, d'ajout de l'image ou de suppression de l'image)
+  Widget saveButton(BuildContext context, VisionBoardViewModel viewModel) {
+    return SizedBox(
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+        ),
+        onPressed: viewModel.isBusy
+            ? null
+            : () async {
+                await viewModel.saveVisionBoard();
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: message('Vision board saved successfully')),
+                );
+              },
+        child: viewModel.isBusy
+            ? const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            : message("Save"),
+      ),
+    );
+  }
+
+  // ======================== Sous-méthodes existantes (inchangées) ====================================
+
   List<Widget> showImages(VisionBoardViewModel viewModel) {
     List<Widget> images = [];
     for (VisionBoardItem item in viewModel.allElements) {
@@ -131,13 +162,13 @@ class _VisionBoardWidgetState extends State<VisionBoardWidget>
                       child: Container(
                         width: item.size.width * item.scale,
                         height: item.size.height * item.scale,
-                        decoration: BoxDecoration(
+                        /*decoration: BoxDecoration(
                           border: Border.all(
                             color: Colors.red,
                             width: 4.0,
                           ),
                           borderRadius: BorderRadius.circular(4.0),
-                        ),
+                        ),*/
                       ),
                     )
                   else if (viewModel.alignImagesLogic.selectedIds
@@ -181,7 +212,6 @@ class _VisionBoardWidgetState extends State<VisionBoardWidget>
     );
   }
 
-  // Détection du movement des doigts (Changement par rapport à la taille et à la rotation de l'image)
   void gestureDetectorAct(
     ScaleUpdateDetails details,
     VisionBoardViewModel viewModel,
@@ -210,7 +240,6 @@ class _VisionBoardWidgetState extends State<VisionBoardWidget>
     );
   }
 
-  // Ligne des options de l'image sélectionné
   Wrap imageOptions(VisionBoardViewModel viewModel) {
     return Wrap(
       alignment: WrapAlignment.spaceBetween,
@@ -248,9 +277,7 @@ class _VisionBoardWidgetState extends State<VisionBoardWidget>
       ],
     );
   }
-  // =================================== BACKGROUND =========================================================
 
-  // Met à jour l'image ou la couleur de l'arrière-plan de vision board
   ElevatedButton selectBackgroundButton(
       BuildContext context, VisionBoardViewModel viewModel) {
     return ElevatedButton(
@@ -261,7 +288,6 @@ class _VisionBoardWidgetState extends State<VisionBoardWidget>
     );
   }
 
-  // Charger l'image ou la couleur de l'arrière-plan de vision board
   Container getBackgroundContainer(
       VisionBoardViewModel viewModel, BuildContext context) {
     return Container(

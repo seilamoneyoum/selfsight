@@ -1,7 +1,7 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:selfsight/presentation/view/goal/vision_board/vision_board_viewmodel.dart';
 
 class BackgroundLogic {
@@ -34,7 +34,19 @@ class BackgroundLogic {
 
     if (selectedXFile == null) return;
 
-    backgroundImage = File(selectedXFile.path);
+    final Directory appDocDir = await getApplicationDocumentsDirectory();
+    final String uniqueFileName =
+        'background_${DateTime.now().microsecondsSinceEpoch}_${selectedXFile.name}';
+    final File persistentFile = File('${appDocDir.path}/$uniqueFileName');
+
+    try {
+      final bytes = await selectedXFile.readAsBytes();
+      await persistentFile.writeAsBytes(bytes);
+    } catch (e) {
+      await File(selectedXFile.path).copy(persistentFile.path);
+    }
+
+    backgroundImage = persistentFile;
 
     viewModel.notifyListeners();
   }

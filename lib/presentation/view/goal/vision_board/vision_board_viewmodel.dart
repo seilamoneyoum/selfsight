@@ -1,20 +1,25 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:selfsight/domain/entities/vision_board/vision_board.dart';
 import 'package:selfsight/domain/entities/vision_board/vision_board_item.dart';
+import 'package:selfsight/presentation/app/app_setup.dart';
 import 'package:selfsight/presentation/view/goal/vision_board/viewmodel/align_images_logic.dart';
 import 'package:selfsight/presentation/view/goal/vision_board/viewmodel/background_logic.dart';
 import 'package:selfsight/presentation/view/goal/vision_board/viewmodel/image_logic.dart';
+import 'package:selfsight/services/vision_board_service.dart';
 import 'package:stacked/stacked.dart';
 import 'package:image/image.dart' as image;
 import 'package:path_provider/path_provider.dart';
 
 class VisionBoardViewModel extends BaseViewModel {
+  final String? goalId;
+  final VisionBoardService _visionBoardService = locator<VisionBoardService>();
   late final AlignImagesLogic alignImagesLogic;
   late final BackgroundLogic backgroundLogic;
   late final ImageLogic imageLogic;
 
-  VisionBoardViewModel() {
+  VisionBoardViewModel({this.goalId}) {
     alignImagesLogic = AlignImagesLogic(viewModel: this);
     backgroundLogic = BackgroundLogic(viewModel: this);
     imageLogic = ImageLogic(viewModel: this);
@@ -23,14 +28,52 @@ class VisionBoardViewModel extends BaseViewModel {
   double? gestureStartScale;
   double? gestureStartRotation;
 
-  //late VisionBoard visionBoard;
-
   List<VisionBoardItem> elements = [];
   VisionBoardItem? selectedItem;
 
   String selectedId = "-1";
 
   List<VisionBoardItem> get allElements => elements;
+
+  /// Charger le vision board existant lié à ce goal, s'il y en a un.
+  /// Si le goal n'a pas encore été sauvegardé, il n'y a rien à charger.
+  Future<void> loadVisionBoard() async {
+    if (goalId == null) return;
+
+    setBusy(true);
+    final board = await _visionBoardService.getVisionBoardByGoalId(goalId!);
+    if (board != null) {
+      elements = board.items;
+
+      if (board.backgroundImagePath != null) {
+        backgroundLogic.backgroundImage = File(board.backgroundImagePath!);
+      } else if (board.backgroundColorValue != null) {
+        backgroundLogic.backgroundColor =
+            VisionBoard.intToColor(board.backgroundColorValue)!;
+      }
+    }
+    setBusy(false);
+    notifyListeners();
+  }
+
+  /// Sauvegarder l'état actuel du board. Ne fait rien si le goal n'a pas
+  /// encore été créé (pas de goalId).
+  Future<void> saveVisionBoard() async {
+    if (goalId == null) return;
+
+    final board = VisionBoard(
+      goalId: goalId!,
+      items: elements,
+      backgroundColorValue: backgroundLogic.isImageBackgroundSelected
+          ? null
+          : VisionBoard.colorToInt(backgroundLogic.backgroundColor),
+      backgroundImagePath: backgroundLogic.isImageBackgroundSelected
+          ? backgroundLogic.backgroundImage?.path
+          : null,
+    );
+
+    await _visionBoardService.saveVisionBoard(board);
+  }
 
   void resetValues() {
     selectedId = "-1";

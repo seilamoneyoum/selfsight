@@ -18,4 +18,28 @@ class VisionBoardItem {
     required this.scale,
     required this.createAt,
   });
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'imagePath': imagePath,
+        'positionX': position.dx,
+        'positionY': position.dy,
+        'width': size.width,
+        'height': size.height,
+        'rotation': rotation,
+        'scale': scale,
+        'createAt': createAt,
+      };
+
+  factory VisionBoardItem.fromJson(Map<String, dynamic> json) {
+    return VisionBoardItem(
+      id: json['id'],
+      imagePath: json['imagePath'],
+      position: Offset(json['positionX'], json['positionY']),
+      size: Size(json['width'], json['height']),
+      rotation: json['rotation'],
+      scale: json['scale'],
+      createAt: json['createAt'],
+    );
+  }
 }
