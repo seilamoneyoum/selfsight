@@ -35,11 +35,11 @@ class _GoalViewState extends State<GoalView>
 
     _tabController.addListener(() {
       final newIndex = _tabController.index;
-      if (newIndex == 1 && _goalViewModel?.goalId == null) {
+
+      if (newIndex != 0 && _goalViewModel?.goalId == null) {
         _tabController.index = _pageController.page?.round() ?? 0;
         return;
       }
-
       if (_pageController.page?.round() != newIndex) {
         _pageController.animateToPage(
           newIndex,
@@ -74,7 +74,7 @@ class _GoalViewState extends State<GoalView>
         viewModel.loadGoal();
       },
       builder: (context, viewModel, child) {
-        final bool isVisionBoardEnabled = viewModel.goalId != null;
+        bool isInEditingMode = viewModel.goalId != null;
 
         return Scaffold(
           appBar: AppBar(
@@ -87,14 +87,25 @@ class _GoalViewState extends State<GoalView>
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       message("Vision board"),
-                      if (!isVisionBoardEnabled) ...[
+                      if (!isInEditingMode) ...[
                         const SizedBox(width: 4),
                         const Icon(Icons.lock_outline, size: 14),
                       ],
                     ],
                   ),
                 ),
-                const Tab(text: "Tasks"),
+                Tab(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      message("Tasks"),
+                      if (!isInEditingMode) ...[
+                        const SizedBox(width: 4),
+                        const Icon(Icons.lock_outline, size: 14),
+                      ],
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -108,13 +119,16 @@ class _GoalViewState extends State<GoalView>
             },
             children: [
               _goalFormContainer(viewModel, _taskViewModel!),
-              isVisionBoardEnabled
+              isInEditingMode
                   ? _visionBoardContainer(viewModel.goalId!)
-                  : _visionBoardLockedPlaceholder(),
-              ListenableBuilder(
-                listenable: _taskViewModel!,
-                builder: (context, _) => TaskWidget(viewModel: _taskViewModel!),
-              ),
+                  : _tabLockedPlaceholder(),
+              isInEditingMode
+                  ? ListenableBuilder(
+                      listenable: _taskViewModel!,
+                      builder: (context, _) =>
+                          TaskWidget(viewModel: _taskViewModel!),
+                    )
+                  : _tabLockedPlaceholder(),
             ],
           ),
         );
@@ -132,7 +146,7 @@ ViewModelBuilder<VisionBoardViewModel> _visionBoardContainer(String goalId) {
   );
 }
 
-Widget _visionBoardLockedPlaceholder() {
+Widget _tabLockedPlaceholder() {
   return Center(
     child: Padding(
       padding: const EdgeInsets.all(24.0),
@@ -141,7 +155,7 @@ Widget _visionBoardLockedPlaceholder() {
         children: [
           Icon(Icons.lock_outline, size: 48, color: Colors.grey[400]),
           const SizedBox(height: 16),
-          message("Save your goal first to unlock the vision board"),
+          message("Save your goal first to unlock this functionality"),
         ],
       ),
     ),
