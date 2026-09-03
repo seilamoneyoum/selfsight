@@ -54,7 +54,6 @@ void main() {
     progress: testProgress,
     category: testCategory,
     createAt: DateTime.now().toIso8601String(),
-    visionBoardPath: null,
   );
 
   group('loadGoal', () {
@@ -119,7 +118,6 @@ void main() {
         expect(captured.title, title);
         expect(captured.category, category);
         expect(captured.progress, progress);
-        expect(captured.visionBoardPath, isNull);
 
         // Vérifier que le viewModel a bien mis à jour son goalId
         expect(viewModel.goalId, isNotNull);

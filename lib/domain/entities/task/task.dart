@@ -1,4 +1,3 @@
-// task.dart
 import 'package:selfsight/domain/entities/task/frequency.dart';
 
 class Task {

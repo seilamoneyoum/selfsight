@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:selfsight/presentation/view/daily_tasks/daily_tasks_viewmodel.dart';
@@ -7,8 +8,6 @@ import 'package:selfsight/presentation/app/app.router.dart';
 import 'package:selfsight/presentation/view/goal/task/task_helpers.dart';
 import 'package:selfsight/presentation/view/templates.dart';
 
-/// Point d'entrée : appeler ceci depuis la home view quand l'utilisateur
-/// clique sur un objectif existant.
 void showDailyTasksSheet(BuildContext context, String goalId) {
   showModalBottomSheet(
     context: context,
@@ -66,8 +65,9 @@ class DailyTasksSheet extends StatelessWidget {
             controller: scrollController,
             padding: const EdgeInsets.all(16),
             children: [
+              visionBoardPreview(viewModel.visionBoardSnapshotPath, context),
               const SizedBox(height: 20),
-              subtitleInterface("Today's tasks"),
+              smallTitleInterface("Today's tasks"),
               const SizedBox(height: 8),
               incompleteTaskList(viewModel),
               const SizedBox(height: 8),
@@ -81,7 +81,7 @@ class DailyTasksSheet extends StatelessWidget {
 
   Widget dragHandle() {
     return Container(
-      width: 40,
+      width: 60,
       height: 4,
       decoration: BoxDecoration(
         color: Colors.grey[300],
@@ -94,14 +94,7 @@ class DailyTasksSheet extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Expanded(
-          child: Text(
-            title,
-            style:
-                GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w700),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
+        Expanded(child: subtitleInterface(title)),
         TextButton.icon(
           icon: const Icon(Icons.edit_outlined, size: 18),
           label: message("Edit"),
@@ -161,12 +154,8 @@ class DailyTasksSheet extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
+                    smallTitleInterface(
                       "Tasks completed for today or this week (${viewModel.completedTasks.length})",
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
                     ),
                     Icon(
                       viewModel.isCompleteTaskListExpanded
@@ -229,10 +218,7 @@ class DailyTasksSheet extends StatelessWidget {
           onPressed:
               progress > 0 ? () => viewModel.adjustProgress(task, -1) : null,
         ),
-        Text(
-          '$progress/$target',
-          style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600),
-        ),
+        message('$progress/$target'),
         IconButton(
           icon: const Icon(Icons.add_circle_outline),
           onPressed: progress < target
@@ -240,6 +226,21 @@ class DailyTasksSheet extends StatelessWidget {
               : null,
         ),
       ],
+    );
+  }
+
+  Widget visionBoardPreview(String? path, BuildContext context) {
+    return ClipRRect(
+      child: SizedBox(
+        height: MediaQuery.of(context).size.width,
+        width: MediaQuery.of(context).size.width,
+        child: path != null
+            ? Image.file(File(path), fit: BoxFit.contain)
+            : Container(
+                color: Colors.grey[200],
+                child: Center(child: message("No vision board yet")),
+              ),
+      ),
     );
   }
 }

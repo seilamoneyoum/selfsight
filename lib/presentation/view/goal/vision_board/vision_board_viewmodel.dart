@@ -14,6 +14,7 @@ import 'package:path_provider/path_provider.dart';
 
 class VisionBoardViewModel extends BaseViewModel {
   final String? goalId;
+
   final VisionBoardService _visionBoardService = locator<VisionBoardService>();
   late final AlignImagesLogic alignImagesLogic;
   late final BackgroundLogic backgroundLogic;
@@ -28,12 +29,13 @@ class VisionBoardViewModel extends BaseViewModel {
   double? gestureStartScale;
   double? gestureStartRotation;
 
-  List<VisionBoardItem> elements = [];
+  List<VisionBoardItem> _elements = [];
+  List<VisionBoardItem> get allElements => _elements;
+
   VisionBoardItem? selectedItem;
 
   String selectedId = "-1";
-
-  List<VisionBoardItem> get allElements => elements;
+  String? snapshotPath;
 
   /// Charger le vision board existant lié à ce goal, s'il y en a un.
   /// Si le goal n'a pas encore été sauvegardé, il n'y a rien à charger.
@@ -43,7 +45,7 @@ class VisionBoardViewModel extends BaseViewModel {
     setBusy(true);
     final board = await _visionBoardService.getVisionBoardByGoalId(goalId!);
     if (board != null) {
-      elements = board.items;
+      _elements = board.items;
 
       if (board.backgroundImagePath != null) {
         backgroundLogic.backgroundImage = File(board.backgroundImagePath!);
@@ -58,21 +60,25 @@ class VisionBoardViewModel extends BaseViewModel {
 
   /// Sauvegarder l'état actuel du board. Ne fait rien si le goal n'a pas
   /// encore été créé (pas de goalId).
-  Future<void> saveVisionBoard() async {
+  Future<void> saveVisionBoard({String? snapshotPath}) async {
     if (goalId == null) return;
+    setBusy(true);
+    this.snapshotPath = snapshotPath ?? this.snapshotPath;
 
     final board = VisionBoard(
       goalId: goalId!,
-      items: elements,
+      items: _elements,
       backgroundColorValue: backgroundLogic.isImageBackgroundSelected
           ? null
           : VisionBoard.colorToInt(backgroundLogic.backgroundColor),
       backgroundImagePath: backgroundLogic.isImageBackgroundSelected
           ? backgroundLogic.backgroundImage?.path
           : null,
+      snapshotPath: this.snapshotPath,
     );
 
     await _visionBoardService.saveVisionBoard(board);
+    setBusy(false);
   }
 
   void resetValues() {
@@ -83,7 +89,7 @@ class VisionBoardViewModel extends BaseViewModel {
 
   void selectItem(String id) {
     selectedId = id;
-    selectedItem = elements.where((item) => item.id == id).first;
+    selectedItem = _elements.where((item) => item.id == id).first;
     notifyListeners();
   }
 
@@ -101,7 +107,7 @@ class VisionBoardViewModel extends BaseViewModel {
         .toList();
 
     List<VisionBoardItem> newItems = await Future.wait(futures);
-    elements.addAll(newItems);
+    _elements.addAll(newItems);
     notifyListeners();
   }
 
@@ -158,23 +164,23 @@ class VisionBoardViewModel extends BaseViewModel {
 
 // Déplace l'image sélectionnée d'un niveau vers l'avant
   void bringForward(String id) {
-    int index = elements.indexWhere((item) => item.id == id);
+    int index = _elements.indexWhere((item) => item.id == id);
 // Impossible d'avancer si l'on se trouve déjà tout en haut
-    if (index == -1 || index == elements.length - 1) return;
+    if (index == -1 || index == _elements.length - 1) return;
 
-    final item = elements.removeAt(index);
-    elements.insert(index + 1, item);
+    final item = _elements.removeAt(index);
+    _elements.insert(index + 1, item);
     notifyListeners();
   }
 
   /// Déplace l'image sélectionnée d'un niveau vers l'arrière
   void sendBackward(String id) {
-    int index = elements.indexWhere((item) => item.id == id);
+    int index = _elements.indexWhere((item) => item.id == id);
 // Impossible de reculer si l'on se trouve déjà tout en bas
     if (index == -1 || index == 0) return;
 
-    final item = elements.removeAt(index);
-    elements.insert(index - 1, item);
+    final item = _elements.removeAt(index);
+    _elements.insert(index - 1, item);
     notifyListeners();
   }
 }

@@ -391,7 +391,6 @@ void main() {
       ),
       category: Category.healthFitness,
       createAt: DateTime.now().toIso8601String(),
-      visionBoardPath: null,
     );
 
     Future<GoalViewModel> setupExistingGoalViewModel(

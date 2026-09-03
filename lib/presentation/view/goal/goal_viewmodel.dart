@@ -36,7 +36,6 @@ class GoalViewModel extends BaseViewModel {
     _goal = Goal(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: title,
-      visionBoardPath: null,
       progress: progress,
       category: category,
       createAt: DateTime.now().toIso8601String(),

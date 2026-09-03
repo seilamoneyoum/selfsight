@@ -20,7 +20,8 @@ class ImageLogic {
   }
 
   void removeItem(String id) {
-    final itemToRemove = viewModel.elements.firstWhere((item) => item.id == id);
+    final itemToRemove =
+        viewModel.allElements.firstWhere((item) => item.id == id);
 
     try {
       final file = File(itemToRemove.imagePath);
@@ -28,7 +29,7 @@ class ImageLogic {
         file.deleteSync();
       }
     } finally {
-      viewModel.elements.removeWhere((item) => item.id == id);
+      viewModel.allElements.removeWhere((item) => item.id == id);
       viewModel.selectedId = "-1";
       viewModel.selectedItem = null;
       viewModel.notifyListeners();

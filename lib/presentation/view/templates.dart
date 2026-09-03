@@ -50,7 +50,7 @@ Text smallTitleInterface(String title) {
   return Text(
     title,
     style: GoogleFonts.poppins(
-        fontSize: 15, fontWeight: FontWeight.w300, color: Colors.grey[800]),
+        fontSize: 15, fontWeight: FontWeight.w500, color: Colors.grey[800]),
   );
 }
 

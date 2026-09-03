@@ -1,5 +1,9 @@
 import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:selfsight/domain/entities/vision_board/vision_board_item.dart';
 import 'package:selfsight/presentation/view/goal/vision_board/widget/background_container.dart';
 import 'package:selfsight/presentation/view/goal/vision_board/vision_board_viewmodel.dart';
@@ -7,8 +11,9 @@ import 'package:selfsight/presentation/view/templates.dart';
 
 class VisionBoardWidget extends StatefulWidget {
   final VisionBoardViewModel viewModel;
+  final GlobalKey _boardKey = GlobalKey();
 
-  const VisionBoardWidget({super.key, required this.viewModel});
+  VisionBoardWidget({super.key, required this.viewModel});
 
   @override
   State<VisionBoardWidget> createState() => _VisionBoardWidgetState();
@@ -18,6 +23,8 @@ class _VisionBoardWidgetState extends State<VisionBoardWidget>
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
+
+  final GlobalKey _boardKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -79,25 +86,29 @@ class _VisionBoardWidgetState extends State<VisionBoardWidget>
 
   Widget saveButton(BuildContext context, VisionBoardViewModel viewModel) {
     return SizedBox(
-      width: 300,
+      width: double.infinity,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4.0),
-          ),
-          minimumSize: const Size(double.infinity, 48),
         ),
         onPressed: viewModel.isBusy
             ? null
             : () async {
-                await viewModel.saveVisionBoard();
+                final snapshotPath = await _captureSnapshot(viewModel.goalId!);
+                await viewModel.saveVisionBoard(snapshotPath: snapshotPath);
                 if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: message('Vision board saved successfully')),
                 );
               },
-        child: message("Save"),
+        child: viewModel.isBusy
+            ? const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                    strokeWidth: 2, color: Colors.white),
+              )
+            : message("Save"),
       ),
     );
   }
@@ -298,23 +309,50 @@ class _VisionBoardWidgetState extends State<VisionBoardWidget>
     );
   }
 
-  Container getBackgroundContainer(
+  Widget getBackgroundContainer(
       VisionBoardViewModel viewModel, BuildContext context) {
-    return Container(
-      decoration: viewModel.backgroundLogic.isImageBackgroundSelected
-          ? BoxDecoration(
-              image: DecorationImage(
-                image: FileImage(viewModel.backgroundLogic.backgroundImage!),
-                fit: BoxFit.cover,
-              ),
-            )
-          : null,
-      color: viewModel.backgroundLogic.isImageBackgroundSelected
-          ? null
-          : viewModel.backgroundLogic.backgroundColor,
-      width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.width,
-      child: Stack(children: showImages(viewModel)),
+    return RepaintBoundary(
+      key: _boardKey,
+      child: Container(
+        decoration: viewModel.backgroundLogic.isImageBackgroundSelected
+            ? BoxDecoration(
+                image: DecorationImage(
+                  image: FileImage(viewModel.backgroundLogic.backgroundImage!),
+                  fit: BoxFit.cover,
+                ),
+              )
+            : null,
+        color: viewModel.backgroundLogic.isImageBackgroundSelected
+            ? null
+            : viewModel.backgroundLogic.backgroundColor,
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.width,
+        child: Stack(children: showImages(viewModel)),
+      ),
     );
+  }
+
+  Future<String?> _captureSnapshot(String goalId) async {
+    try {
+      final renderObject = _boardKey.currentContext?.findRenderObject();
+      if (renderObject is! RenderRepaintBoundary) return null;
+
+      final ui.Image image = await renderObject.toImage(pixelRatio: 1.0);
+      final ByteData? byteData =
+          await image.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData == null) return null;
+
+      final Uint8List pngBytes = byteData.buffer.asUint8List();
+
+      final appDocDir = await getApplicationDocumentsDirectory();
+      final file = File('${appDocDir.path}/vision_board_snapshot_$goalId.png');
+      await file.writeAsBytes(pngBytes);
+
+      await FileImage(file).evict();
+
+      return file.path;
+    } catch (e) {
+      return null;
+    }
   }
 }

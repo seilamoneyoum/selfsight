@@ -76,9 +76,6 @@ class GoalService {
     final preferences = await SharedPreferences.getInstance();
     List<Goal> currentGoals = await getGoals();
 
-    final goalToDelete = currentGoals.firstWhere((g) => g.id == id);
-    await deleteImageFile(goalToDelete.visionBoardPath);
-
     currentGoals.removeWhere((g) => g.id == id);
 
     List<String> jsonList =
@@ -86,7 +83,7 @@ class GoalService {
     await preferences.setStringList(_goalsKey, jsonList);
   }
 
-  // Mise à jour du objectif plus conventiel
+  // Mise à jour du objectif plus conventionnel
   Future<void> updateGoal(Goal updatedGoal) async {
     await saveGoal(updatedGoal);
   }

@@ -81,6 +81,7 @@ class VisionBoardService {
         currentBoards.where((b) => b.goalId == goalId).firstOrNull;
     if (boardToDelete != null) {
       await deleteImageFile(boardToDelete.backgroundImagePath);
+      await deleteImageFile(boardToDelete.snapshotPath);
       for (final item in boardToDelete.items) {
         await deleteImageFile(item.imagePath);
       }

@@ -1,4 +1,6 @@
 import 'package:selfsight/domain/entities/task/frequency.dart';
+import 'package:selfsight/domain/entities/vision_board/vision_board.dart';
+import 'package:selfsight/services/vision_board_service.dart';
 import 'package:stacked/stacked.dart';
 import 'package:selfsight/presentation/app/app_setup.dart';
 import 'package:selfsight/services/task_service.dart';
@@ -10,6 +12,7 @@ import 'package:selfsight/presentation/view/goal/task/task_helpers.dart';
 class DailyTasksViewModel extends BaseViewModel {
   final _taskService = locator<TaskService>();
   final _goalService = locator<GoalService>();
+  final _visionBoardService = locator<VisionBoardService>();
   final String goalId;
 
   DailyTasksViewModel({required this.goalId});
@@ -18,6 +21,12 @@ class DailyTasksViewModel extends BaseViewModel {
   List<Task> get completedTasks => _completeTasks;
   List<Task> _incompleteTasks = [];
   List<Task> get incompleteTasks => _incompleteTasks;
+
+  Goal? _goal;
+  Goal? get goal => _goal;
+  String? _visionBoardSnapshotPath;
+  String? get visionBoardSnapshotPath => _visionBoardSnapshotPath;
+  bool isCompleteTaskListExpanded = false;
 
   @override
   void dispose() {
@@ -30,17 +39,15 @@ class DailyTasksViewModel extends BaseViewModel {
     super.dispose();
   }
 
-  Goal? _goal;
-  Goal? get goal => _goal;
-
-  bool isCompleteTaskListExpanded = false;
-
   Future<void> load() async {
     setBusy(true);
-    final today = DateTime.now();
+    DateTime today = DateTime.now();
     _goal = await _goalService.getGoalById(goalId);
     List<Task> allTasks = await _taskService.getTasksByGoalId(goalId);
 
+    VisionBoard? visionBoard =
+        await _visionBoardService.getVisionBoardByGoalId(goalId);
+    _visionBoardSnapshotPath = visionBoard?.snapshotPath;
     _completeTasks = [];
     _incompleteTasks = [];
 
