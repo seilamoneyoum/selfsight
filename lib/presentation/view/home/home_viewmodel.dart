@@ -18,6 +18,8 @@ class HomeViewModel extends BaseViewModel {
   Future<void> loadGoals() async {
     setBusy(true);
     _goals = await _goalService.getGoals();
+    _goals.sort((a, b) => a.id.compareTo(b.id));
+
     setBusy(false);
     notifyListeners();
   }

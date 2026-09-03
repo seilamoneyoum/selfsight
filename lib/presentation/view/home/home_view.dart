@@ -26,7 +26,8 @@ class _HomeViewState extends State<HomeView> {
                     crossAxisCount: 2,
                     children: viewModel.goals.map((goal) {
                       return GestureDetector(
-                        onTap: () => showDailyTasksSheet(context, goal.id),
+                        onTap: () => showDailyTasksSheet(
+                            context, goal.id, viewModel.loadGoals),
                         child: Container(
                           margin: const EdgeInsets.all(8),
                           decoration: BoxDecoration(

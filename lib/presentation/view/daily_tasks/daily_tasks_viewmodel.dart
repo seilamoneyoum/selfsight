@@ -66,8 +66,8 @@ class DailyTasksViewModel extends BaseViewModel {
   }
 
   void _sortLists() {
-    _incompleteTasks.sort((a, b) => a.name.compareTo(b.name));
-    _completeTasks.sort((a, b) => a.name.compareTo(b.name));
+    _incompleteTasks.sort((a, b) => a.id.compareTo(b.id));
+    _completeTasks.sort((a, b) => a.id.compareTo(b.id));
   }
 
   int progressFor(Task task) => currentProgressFor(task, DateTime.now());

@@ -8,13 +8,16 @@ import 'package:selfsight/presentation/app/app.router.dart';
 import 'package:selfsight/presentation/view/goal/task/task_helpers.dart';
 import 'package:selfsight/presentation/view/templates.dart';
 
-void showDailyTasksSheet(BuildContext context, String goalId) {
+void showDailyTasksSheet(BuildContext context, String goalId,
+    [VoidCallback? onDismissed]) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     builder: (context) => DailyTasksSheet(goalId: goalId),
-  );
+  ).whenComplete(() {
+    if (onDismissed != null) onDismissed();
+  });
 }
 
 class DailyTasksSheet extends StatelessWidget {
