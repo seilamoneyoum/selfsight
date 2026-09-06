@@ -13,6 +13,7 @@ import 'package:selfsight/presentation/view/goal/goal_viewmodel.dart';
 import 'package:selfsight/presentation/view/goal/task/task_viewmodel.dart';
 import 'package:selfsight/services/goal_service.dart';
 import 'package:selfsight/services/task_service.dart';
+import 'package:selfsight/services/vision_board_service.dart';
 import 'package:stacked_services/stacked_services.dart';
 
 // Mocks
@@ -21,6 +22,8 @@ class MockNavigationService extends Mock implements NavigationService {}
 class MockGoalService extends Mock implements GoalService {}
 
 class MockTaskService extends Mock implements TaskService {}
+
+class MockVisionBoardService extends Mock implements VisionBoardService {}
 
 // Fakes pour registerFallbackValue
 class FakeGoal extends Fake implements Goal {}
@@ -31,6 +34,7 @@ void main() {
   late MockNavigationService mockNavigationService;
   late MockGoalService mockGoalService;
   late MockTaskService mockTaskService;
+  late MockVisionBoardService mockVisionBoardService;
 
   setUpAll(() {
     registerFallbackValue(FakeGoal());
@@ -41,10 +45,12 @@ void main() {
     mockNavigationService = MockNavigationService();
     mockGoalService = MockGoalService();
     mockTaskService = MockTaskService();
+    mockVisionBoardService = MockVisionBoardService();
 
     locator.registerSingleton<NavigationService>(mockNavigationService);
     locator.registerSingleton<GoalService>(mockGoalService);
     locator.registerSingleton<TaskService>(mockTaskService);
+    locator.registerSingleton<VisionBoardService>(mockVisionBoardService);
 
     when(() => mockTaskService.saveTask(any())).thenAnswer((_) async {});
   });
@@ -143,13 +149,14 @@ void main() {
         expectNoErrorMessage(tester, 'End date needs to be after start date');
 
         expect(find.widgetWithText(ElevatedButton, 'Save'), findsOneWidget);
-        verify(() => mockGoalService.saveGoal(any<Goal>())).called(1);
-        final captured = verify(() => mockGoalService.saveGoal(captureAny()))
-            .captured
-            .single as Goal;
-        expect(captured.title, 'Mon nouveau but');
-        expect(captured.category, Category.healthFitness);
-        expect(captured.progress.priority, Priority.high);
+
+        final captured =
+            verify(() => mockGoalService.saveGoal(captureAny())).captured;
+        expect(captured.length, 1);
+        final capturedGoal = captured.single as Goal;
+        expect(capturedGoal.title, 'Mon nouveau but');
+        expect(capturedGoal.category, Category.healthFitness);
+        expect(capturedGoal.progress.priority, Priority.high);
       },
     );
 
@@ -431,16 +438,17 @@ void main() {
         expectNoErrorMessage(tester, 'Priority needs to be selected');
         expectNoErrorMessage(tester, 'End date needs to be after start date');
 
-        verify(() => mockGoalService.updateGoal(any<Goal>())).called(1);
-        final captured = verify(() => mockGoalService.updateGoal(captureAny()))
-            .captured
-            .single as Goal;
-        expect(captured.id, existingGoal.id);
-        expect(captured.title, 'But modifié');
-        expect(captured.category, Category.careerEducation);
-        expect(captured.progress.priority, Priority.high);
-        expect(captured.progress.startDate, existingGoal.progress.startDate);
-        expect(captured.progress.endDate, existingGoal.progress.endDate);
+        final captured =
+            verify(() => mockGoalService.updateGoal(captureAny())).captured;
+        expect(captured.length, 1);
+        final capturedGoal = captured.single as Goal;
+        expect(capturedGoal.id, existingGoal.id);
+        expect(capturedGoal.title, 'But modifié');
+        expect(capturedGoal.category, Category.careerEducation);
+        expect(capturedGoal.progress.priority, Priority.high);
+        expect(
+            capturedGoal.progress.startDate, existingGoal.progress.startDate);
+        expect(capturedGoal.progress.endDate, existingGoal.progress.endDate);
       },
     );
 
@@ -545,12 +553,13 @@ void main() {
         expectNoErrorMessage(tester, 'Title is needed');
         expectNoErrorMessage(tester, 'Category needs to be selected');
         expectNoErrorMessage(tester, 'Priority needs to be selected');
-        verify(() => mockGoalService.updateGoal(any<Goal>())).called(1);
-        final captured = verify(() => mockGoalService.updateGoal(captureAny()))
-            .captured
-            .single as Goal;
-        expect(captured.id, existingGoal.id);
-        expect(captured.title, 'But corrigé');
+
+        final captured =
+            verify(() => mockGoalService.updateGoal(captureAny())).captured;
+        expect(captured.length, 1);
+        final capturedGoal = captured.single as Goal;
+        expect(capturedGoal.id, existingGoal.id);
+        expect(capturedGoal.title, 'But corrigé');
       },
     );
 

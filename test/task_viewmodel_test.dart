@@ -29,65 +29,6 @@ void main() {
   final frequency = Frequency(
       unit: Unit.minute, amount: Amount.day, time: 20, days: [Day.monday]);
 
-  group('Goal not yet saved (goalId == null)', () {
-    test('addTask adds the task locally without calling saveTask', () async {
-      // Arrange
-      final viewModel = TaskViewModel(goalId: null);
-
-      // Act
-      await viewModel.addTask('Méditation', frequency);
-
-      // Assert
-      expect(viewModel.tasks.length, 1);
-      expect(viewModel.tasks.first.name, 'Méditation');
-      verifyNever(() => mockTaskService.saveTask(any()));
-    });
-
-    test('updateTask updates the task locally without calling the service',
-        () async {
-      // Arrange
-      final viewModel = TaskViewModel(goalId: null);
-      await viewModel.addTask('Ancien nom', frequency);
-      viewModel.startEditingTask(viewModel.tasks.first.id);
-
-      // Act
-      await viewModel.updateTask('Nouveau nom', frequency);
-
-      // Assert
-      expect(viewModel.tasks.first.name, 'Nouveau nom');
-      verifyNever(() => mockTaskService.updateTask(any()));
-    });
-
-    test('deleteTask removes the task locally without calling the service',
-        () async {
-      // Arrange
-      final viewModel = TaskViewModel(goalId: null);
-      await viewModel.addTask('À supprimer', frequency);
-      final id = viewModel.tasks.first.id;
-
-      // Act
-      await viewModel.deleteTask(id);
-
-      // Assert
-      expect(viewModel.tasks, isEmpty);
-      verifyNever(() => mockTaskService.deleteTask(any()));
-      verifyNever(() => mockTaskService.deleteTasksByGoalId(any()));
-    });
-
-    test('loadTasks does not call the service and leaves the list empty',
-        () async {
-      // Arrange
-      final viewModel = TaskViewModel(goalId: null);
-
-      // Act
-      await viewModel.loadTasks();
-
-      // Assert
-      expect(viewModel.tasks, isEmpty);
-      verifyNever(() => mockTaskService.getTasksByGoalId(any()));
-    });
-  });
-
   group('Goal already saved (goalId != null)', () {
     const goalId = 'goal_123';
 

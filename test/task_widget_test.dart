@@ -17,6 +17,8 @@ class FakeTask extends Fake implements Task {}
 void main() {
   late MockTaskService mockTaskService;
 
+  const goalId = 'goal_456';
+
   setUpAll(() {
     registerFallbackValue(FakeTask());
   });
@@ -106,14 +108,14 @@ void main() {
   const errUnite = 'Unit needs to be selected';
   const errJours = 'Days need to be selected';
 
-  // ==================== NEW TASK — goal not yet saved ====================
+  // ==================== NEW TASK ====================
 
-  group('New task - goal not yet saved (goalId == null)', () {
+  group('New task', () {
     testWidgets(
-      '1.1 Filling name, amount (day), value, unit and days adds the task to the list and closes the form',
+      '1.1 Filling name, amount (day), value, unit and days adds the task, persists it, and closes the form',
       (tester) async {
         // Arrange
-        final viewModel = TaskViewModel(goalId: null);
+        final viewModel = TaskViewModel(goalId: goalId);
         await tester.pumpWidget(buildTaskWidget(viewModel));
         await openAddForm(tester);
 
@@ -135,15 +137,21 @@ void main() {
         expect(find.text("Boire de l'eau"), findsOneWidget);
         expect(find.text(frequencySummary(frequency)), findsOneWidget);
         expect(find.byType(TaskFormSheet), findsNothing);
-        verifyNever(() => mockTaskService.saveTask(any()));
+
+        final captured =
+            verify(() => mockTaskService.saveTask(captureAny())).captured;
+        expect(captured.length, 1);
+        final capturedTask = captured.single as Task;
+        expect(capturedTask.name, "Boire de l'eau");
+        expect(capturedTask.goalId, goalId);
       },
     );
 
     testWidgets(
-      '1.2 Filling name, amount (week), value, unit and days adds the task to the list and closes the form',
+      '1.2 Filling name, amount (week), value, unit and days adds the task, persists it, and closes the form',
       (tester) async {
         // Arrange
-        final viewModel = TaskViewModel(goalId: null);
+        final viewModel = TaskViewModel(goalId: goalId);
         await tester.pumpWidget(buildTaskWidget(viewModel));
         await openAddForm(tester);
 
@@ -163,22 +171,22 @@ void main() {
         expect(find.text("Boire de l'eau"), findsOneWidget);
         expect(find.text(frequencySummary(frequency)), findsOneWidget);
         expect(find.byType(TaskFormSheet), findsNothing);
-        verifyNever(() => mockTaskService.saveTask(any()));
+        verify(() => mockTaskService.saveTask(any())).called(1);
       },
     );
 
     testWidgets(
-      '2. Submitting the form empty shows three error messages and does not add a task',
+      '2. Submitting the form empty shows error messages and does not add or persist a task',
       (tester) async {
         // Arrange
-        final viewModel = TaskViewModel(goalId: null);
+        final viewModel = TaskViewModel(goalId: goalId);
         await tester.pumpWidget(buildTaskWidget(viewModel));
 
         // Act
         await openAddForm(tester);
         await tapConfirmButton(tester);
 
-// Assert
+        // Assert
         expectErrorMessage(errNom);
         expectErrorMessage(errAmount);
         expectErrorMessage(errValeur);
@@ -193,7 +201,7 @@ void main() {
       '3.1 (Amount: week) Submitting the form almost empty shows error messages and does not add a task',
       (tester) async {
         // Arrange
-        final viewModel = TaskViewModel(goalId: null);
+        final viewModel = TaskViewModel(goalId: goalId);
         await tester.pumpWidget(buildTaskWidget(viewModel));
 
         // Act
@@ -216,7 +224,7 @@ void main() {
       '3.2 (Amount: day) Submitting the form almost empty shows error messages and does not add a task',
       (tester) async {
         // Arrange
-        final viewModel = TaskViewModel(goalId: null);
+        final viewModel = TaskViewModel(goalId: goalId);
         await tester.pumpWidget(buildTaskWidget(viewModel));
 
         // Act
@@ -236,9 +244,9 @@ void main() {
     );
 
     testWidgets(
-      '4. After the errors are shown, filling everything correctly adds the task and clears the errors',
+      '4. After the errors are shown, filling everything correctly adds and persists the task',
       (tester) async {
-        final viewModel = TaskViewModel(goalId: null);
+        final viewModel = TaskViewModel(goalId: goalId);
         await tester.pumpWidget(buildTaskWidget(viewModel));
         await openAddForm(tester);
 
@@ -263,14 +271,14 @@ void main() {
         expectNoErrorMessage(errJours);
         expect(find.text('Marcher'), findsOneWidget);
         expect(viewModel.tasks.length, 1);
-        verifyNever(() => mockTaskService.saveTask(any()));
+        verify(() => mockTaskService.saveTask(any())).called(1);
       },
     );
 
     testWidgets(
-      '5.1 An invalid decimal value shows only the value error',
+      '5.1 An invalid decimal value shows only the value error and does not persist',
       (tester) async {
-        final viewModel = TaskViewModel(goalId: null);
+        final viewModel = TaskViewModel(goalId: goalId);
         await tester.pumpWidget(buildTaskWidget(viewModel));
         await openAddForm(tester);
 
@@ -286,13 +294,14 @@ void main() {
         expectNoErrorMessage(errUnite);
         expectNoErrorMessage(errJours);
         expect(viewModel.tasks, isEmpty);
+        verifyNever(() => mockTaskService.saveTask(any()));
       },
     );
 
     testWidgets(
-      '5.2 A value containing letters shows only the value error',
+      '5.2 A value containing letters shows only the value error and does not persist',
       (tester) async {
-        final viewModel = TaskViewModel(goalId: null);
+        final viewModel = TaskViewModel(goalId: goalId);
         await tester.pumpWidget(buildTaskWidget(viewModel));
         await openAddForm(tester);
 
@@ -305,17 +314,18 @@ void main() {
 
         expectErrorMessage(errValeur);
         expect(viewModel.tasks, isEmpty);
+        verifyNever(() => mockTaskService.saveTask(any()));
       },
     );
   });
 
-  // ==================== EDIT TASK — goal not yet saved ====================
+  // ==================== EDIT TASK ====================
 
-  group('Edit task - goal not yet saved (goalId == null)', () {
+  group('Edit task', () {
     testWidgets(
-      '1. Clearing name, value and unchecking all days does not modify the task',
+      '1. Clearing name, value and unchecking all days does not modify or persist the task',
       (tester) async {
-        final viewModel = TaskViewModel(goalId: null);
+        final viewModel = TaskViewModel(goalId: goalId);
         await viewModel.addTask(
           'Tâche originale',
           Frequency(
@@ -326,6 +336,10 @@ void main() {
         );
         await tester.pumpWidget(buildTaskWidget(viewModel));
         await tester.pumpAndSettle();
+
+        // On oublie l'appel de saveTask généré par addTask ci-dessus, pour
+        // isoler la vérification sur l'action d'édition uniquement.
+        clearInteractions(mockTaskService);
 
         await openEditForm(tester);
         await enterName(tester, '');
@@ -341,9 +355,9 @@ void main() {
     );
 
     testWidgets(
-      '2. Modifying all fields correctly updates the task successfully',
+      '2. Modifying all fields correctly updates and persists the task',
       (tester) async {
-        final viewModel = TaskViewModel(goalId: null);
+        final viewModel = TaskViewModel(goalId: goalId);
         await viewModel.addTask(
           'Ancien nom',
           Frequency(
@@ -354,6 +368,8 @@ void main() {
         );
         await tester.pumpWidget(buildTaskWidget(viewModel));
         await tester.pumpAndSettle();
+
+        clearInteractions(mockTaskService);
 
         await openEditForm(tester);
         await enterName(tester, 'Nouveau nom');
@@ -372,61 +388,20 @@ void main() {
                 time: 45,
                 days: [Day.friday]))),
             findsOneWidget);
-        verifyNever(() => mockTaskService.updateTask(any()));
+
+        final captured =
+            verify(() => mockTaskService.updateTask(captureAny())).captured;
+        expect(captured.length, 1);
+        final capturedTask = captured.single as Task;
+        expect(capturedTask.name, 'Nouveau nom');
       },
     );
   });
 
-  // ==================== goal already saved ====================
+  // ==================== DELETE TASK ====================
 
-  group('New / edit / delete task - goal already saved (goalId != null)', () {
-    const goalId = 'goal_456';
-
-    testWidgets('Adding a valid task persists it through saveTask',
-        (tester) async {
-      final viewModel = TaskViewModel(goalId: goalId);
-      await tester.pumpWidget(buildTaskWidget(viewModel));
-      await openAddForm(tester);
-
-      await enterName(tester, 'Lire');
-      await enterValue(tester, '20');
-      await selectAmount(tester, Amount.day);
-      await selectUnit(tester, Unit.minute);
-      await toggleDay(tester, Day.sunday);
-      await tapConfirmButton(tester);
-
-      expect(find.text('Lire'), findsOneWidget);
-
-      verify(() => mockTaskService.saveTask(any())).called(1);
-    });
-
-    testWidgets('Editing a task persists the change through updateTask',
-        (tester) async {
-      final viewModel = TaskViewModel(goalId: goalId);
-      await viewModel.addTask(
-        'Ancien nom',
-        Frequency(
-            unit: Unit.minute,
-            amount: Amount.day,
-            time: 15,
-            days: [Day.monday]),
-      );
-      await tester.pumpWidget(buildTaskWidget(viewModel));
-      await tester.pumpAndSettle();
-
-      await openEditForm(tester);
-      await enterName(tester, 'Nouveau nom');
-      await enterValue(tester, '20');
-      await selectAmount(tester, Amount.day);
-      await selectUnit(tester, Unit.minute);
-      await toggleDay(tester, Day.sunday);
-      await tapConfirmButton(tester);
-
-      expect(find.text('Nouveau nom'), findsOneWidget);
-      verify(() => mockTaskService.updateTask(any())).called(1);
-    });
-
-    testWidgets('Deleting a task persists the deletion through deleteTask',
+  group('Delete task', () {
+    testWidgets('Deleting a task removes it and persists the deletion',
         (tester) async {
       final viewModel = TaskViewModel(goalId: goalId);
       await viewModel.addTask(
@@ -435,6 +410,8 @@ void main() {
       );
       await tester.pumpWidget(buildTaskWidget(viewModel));
       await tester.pumpAndSettle();
+
+      clearInteractions(mockTaskService);
 
       await tester.tap(find.byIcon(Icons.delete_outline));
       await tester.pumpAndSettle();

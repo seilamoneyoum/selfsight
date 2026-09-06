@@ -54,7 +54,7 @@ class GoalViewModel extends BaseViewModel {
     await _goalService.deleteGoal(goalId!);
     await _visionBoardService.deleteVisionBoardByGoalId(goalId!);
     goalId = null;
-    navigateToHomeGoalView();
+    await navigateToHomeGoalView();
   }
 
   Future<void> updateGoal(

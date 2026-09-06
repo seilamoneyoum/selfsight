@@ -8,11 +8,17 @@ import 'package:selfsight/presentation/app/app.router.dart';
 import 'package:selfsight/presentation/app/app_setup.dart';
 import 'package:selfsight/presentation/view/goal/goal_viewmodel.dart';
 import 'package:selfsight/services/goal_service.dart';
+import 'package:selfsight/services/task_service.dart';
+import 'package:selfsight/services/vision_board_service.dart';
 import 'package:stacked_services/stacked_services.dart';
 
 class MockNavigationService extends Mock implements NavigationService {}
 
 class MockGoalService extends Mock implements GoalService {}
+
+class MockTaskService extends Mock implements TaskService {}
+
+class MockVisionBoardService extends Mock implements VisionBoardService {}
 
 // Fake pour enregistrer une valeur de repli pour Goal (requis pour any<Goal>())
 class FakeGoal extends Fake implements Goal {}
@@ -20,6 +26,8 @@ class FakeGoal extends Fake implements Goal {}
 void main() {
   late MockNavigationService mockNavigationService;
   late MockGoalService mockGoalService;
+  late MockTaskService mockTaskService;
+  late MockVisionBoardService mockVisionBoardService;
 
   setUpAll(() {
     registerFallbackValue(FakeGoal());
@@ -28,10 +36,14 @@ void main() {
   setUp(() {
     mockNavigationService = MockNavigationService();
     mockGoalService = MockGoalService();
+    mockTaskService = MockTaskService();
+    mockVisionBoardService = MockVisionBoardService();
 
     // Remplacer les services dans le locator
     locator.registerSingleton<NavigationService>(mockNavigationService);
     locator.registerSingleton<GoalService>(mockGoalService);
+    locator.registerSingleton<TaskService>(mockTaskService);
+    locator.registerSingleton<VisionBoardService>(mockVisionBoardService);
   });
 
   tearDown(() {
@@ -58,7 +70,7 @@ void main() {
 
   group('loadGoal', () {
     test(
-      'Le but est chargé lorsque goalId est valide',
+      'If goalId is not null and valid, then goal is loaded',
       () async {
         // Arrange
         when(() => mockGoalService.getGoalById(testGoalId))
@@ -76,7 +88,7 @@ void main() {
     );
 
     test(
-      'Rien ne se produit lorsque goalId est null',
+      'If goalId is null, then no methods from service is called',
       () async {
         // Arrange
         final viewModel = GoalViewModel(goalId: null);
@@ -93,7 +105,7 @@ void main() {
 
   group('addGoal', () {
     test(
-      'titre valide + catégorie valide + progress valide -> Goal créé et sauvegardé, goalId mis à jour',
+      'If title, progress and category are valid, then new goal is added.',
       () async {
         // Arrange
         when(() => mockGoalService.saveGoal(any<Goal>()))
@@ -129,23 +141,29 @@ void main() {
 
   group('deleteGoal', () {
     test(
-      'lorsque effacer -> goalId est null et le id du goal ne se trouve pas dans la liste des goals',
+      'Once goal is deleted, goalId becomes null, the goal is removed, and the user is navigated home',
       () async {
         // Arrange
         final viewModel = GoalViewModel(goalId: testGoalId);
-        // Simuler que le goal existe dans le service (pour la suppression)
+        when(() => mockTaskService.deleteTasksByGoalId(testGoalId))
+            .thenAnswer((_) async {});
         when(() => mockGoalService.deleteGoal(testGoalId))
-            .thenAnswer((_) async => Future.value());
-        // Simuler la navigation vers Home (appelée dans deleteGoal)
+            .thenAnswer((_) async {});
+        when(() => mockVisionBoardService.deleteVisionBoardByGoalId(testGoalId))
+            .thenAnswer((_) async {});
         when(() => mockNavigationService.navigateTo(Routes.homeView))
-            .thenAnswer((_) async => Future.value());
+            .thenAnswer((_) async {});
 
         // Act
         await viewModel.deleteGoal();
 
         // Assert
         expect(viewModel.goalId, isNull);
+        verify(() => mockTaskService.deleteTasksByGoalId(testGoalId)).called(1);
         verify(() => mockGoalService.deleteGoal(testGoalId)).called(1);
+        verify(() =>
+                mockVisionBoardService.deleteVisionBoardByGoalId(testGoalId))
+            .called(1);
         verify(() => mockNavigationService.navigateTo(Routes.homeView))
             .called(1);
       },
