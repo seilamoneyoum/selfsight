@@ -11,9 +11,8 @@ import 'package:selfsight/presentation/view/templates.dart';
 
 class VisionBoardWidget extends StatefulWidget {
   final VisionBoardViewModel viewModel;
-  final GlobalKey _boardKey = GlobalKey();
 
-  VisionBoardWidget({super.key, required this.viewModel});
+  const VisionBoardWidget({super.key, required this.viewModel});
 
   @override
   State<VisionBoardWidget> createState() => _VisionBoardWidgetState();
@@ -162,7 +161,7 @@ class _VisionBoardWidgetState extends State<VisionBoardWidget>
                   ),
                   if (viewModel.selectedId == item.id)
                     IgnorePointer(
-                      child: Container(
+                      child: SizedBox(
                         width: item.size.width * item.scale,
                         height: item.size.height * item.scale,
                         /*decoration: BoxDecoration(
