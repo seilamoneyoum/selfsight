@@ -122,7 +122,8 @@ void main() {
       'When the board has a background color value, it is restored as a color background',
       () async {
         // Arrange
-        final colorValue = VisionBoard.colorToInt(Colors.blue);
+        final colorValue =
+            VisionBoard.colorToInt(Color.fromARGB(243, 172, 77, 77));
         final board = VisionBoard(
           goalId: goalId,
           backgroundColorValue: colorValue,
@@ -136,8 +137,8 @@ void main() {
 
         // Assert
         expect(viewModel.backgroundLogic.isImageBackgroundSelected, isFalse);
-        expect(
-            viewModel.backgroundLogic.backgroundColor.value, Colors.blue.value);
+        expect(viewModel.backgroundLogic.backgroundColor,
+            Color.fromARGB(243, 172, 77, 77));
       },
     );
   });

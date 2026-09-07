@@ -31,7 +31,7 @@ class _HomeViewState extends State<HomeView> {
                         child: Container(
                           margin: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 193, 173, 226),
+                            color: const Color.fromARGB(0, 0, 0, 0),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Column(
