@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:selfsight/presentation/view/daily_tasks/daily_tasks_viewmodel.dart';
+import 'package:selfsight/presentation/view/daily_tasks/date_navigator_widget.dart';
 import 'package:stacked/stacked.dart';
 import 'package:selfsight/domain/entities/task/task.dart';
 import 'package:selfsight/presentation/app/app.router.dart';
@@ -69,7 +70,8 @@ class DailyTasksSheet extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             children: [
               visionBoardPreview(viewModel.visionBoardSnapshotPath, context),
-              const SizedBox(height: 20),
+              dateNavigator(context, viewModel),
+              const SizedBox(height: 8),
               smallTitleInterface("Today's tasks"),
               const SizedBox(height: 8),
               incompleteTaskList(viewModel),

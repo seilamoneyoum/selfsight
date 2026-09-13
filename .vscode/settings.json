@@ -18,5 +18,6 @@
         "viewmodel",
         "wednesday"
     ],
-    "cSpell.language": "en,fr"
+    "cSpell.language": "en,fr",
+    "cmake.sourceDirectory": "C:/GitHub/selfsight/windows"
 }

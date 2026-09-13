@@ -69,12 +69,15 @@ class TaskViewModel extends BaseViewModel {
     final index = _tasks.indexWhere((t) => t.id == _editingId);
     if (index == -1) return;
 
+    Task taskLastSavedOnDB = await _taskService.getTaskById(_editingId!);
+
     final updated = Task(
-      id: _editingId!,
-      goalId: goalId ?? '',
-      name: name,
-      frequency: frequency,
-    );
+        id: _editingId!,
+        goalId: goalId ?? '',
+        name: name,
+        frequency: frequency,
+        progressLog: await getUpdatedProgressLog(
+            frequency.time!, taskLastSavedOnDB.progressLog));
 
     if (goalId != null) {
       await _taskService.updateTask(updated);
@@ -82,6 +85,22 @@ class TaskViewModel extends BaseViewModel {
     _tasks[index] = updated;
     _editingId = null;
     notifyListeners();
+  }
+
+// Mise à jour au cas où la nouvelle valeur est plus basse que l'ancienne valeur.
+  Future<Map<String, int>> getUpdatedProgressLog(
+      int newTime, Map<String, int> currentProgressLog) async {
+    Map<String, int> newProgressLog = {};
+
+    currentProgressLog.forEach((key, value) {
+      if (value > newTime) {
+        newProgressLog[key] = newTime;
+      } else {
+        newProgressLog[key] = value;
+      }
+    });
+
+    return newProgressLog;
   }
 
   /// Supprime une tâche.

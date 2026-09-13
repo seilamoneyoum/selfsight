@@ -36,14 +36,19 @@ class _HomeViewState extends State<HomeView> {
                 child: viewModel.isBusy
                     ? const Center(child: CircularProgressIndicator())
                     : viewModel.goals.isEmpty
-                        ? const Center(child: Text('No goals yet'))
-                        : GridView.count(
-                            crossAxisCount: 2,
+                        ? Center(child: message('No goals yet'))
+                        : GridView.builder(
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              childAspectRatio: 0.8,
+                            ),
                             padding: const EdgeInsets.all(8),
-                            childAspectRatio: 0.8,
-                            children: viewModel.goals.map((goal) {
+                            itemCount: viewModel.goals.length,
+                            itemBuilder: (context, index) {
+                              final goal = viewModel.goals[index];
                               return goalCard(context, goal, viewModel);
-                            }).toList(),
+                            },
                           ),
               ),
             ],
