@@ -110,7 +110,7 @@ void main() {
       // Act — nothing, checking the default.
 
       // Assert
-      expect(viewModel.selectedDate, today);
+      expect(viewModel.dateNavigatorLogic.selectedDate, today);
     });
 
     test('canGoToPreviousDate is true when no goal is loaded yet', () {
@@ -118,7 +118,7 @@ void main() {
       final viewModel = DailyTasksViewModel(goalId: testGoalId);
 
       // Act / Assert
-      expect(viewModel.canGoToPreviousDate, isTrue);
+      expect(viewModel.dateNavigatorLogic.canGoToPreviousDate, isTrue);
     });
 
     test('canGoToNextDate is false before today has been exceeded', () {
@@ -126,7 +126,7 @@ void main() {
       final viewModel = DailyTasksViewModel(goalId: testGoalId);
 
       // Act / Assert
-      expect(viewModel.canGoToNextDate, isFalse);
+      expect(viewModel.dateNavigatorLogic.canGoToNextDate, isFalse);
     });
   });
 
@@ -204,7 +204,7 @@ void main() {
       await viewModel.load();
 
       // Act / Assert
-      expect(viewModel.canGoToPreviousDate, isFalse);
+      expect(viewModel.dateNavigatorLogic.canGoToPreviousDate, isFalse);
     });
 
     test('canGoToPreviousDate is true when selectedDate is after startDate',
@@ -216,7 +216,7 @@ void main() {
       await viewModel.load();
 
       // Act / Assert
-      expect(viewModel.canGoToPreviousDate, isTrue);
+      expect(viewModel.dateNavigatorLogic.canGoToPreviousDate, isTrue);
     });
   });
 
@@ -230,10 +230,11 @@ void main() {
       await viewModel.load(); // initial load call #1
 
       // Act
-      await viewModel.goToPreviousDate();
+      await viewModel.dateNavigatorLogic.goToPreviousDate();
 
       // Assert
-      expect(viewModel.selectedDate, today.subtract(const Duration(days: 1)));
+      expect(viewModel.dateNavigatorLogic.selectedDate,
+          today.subtract(const Duration(days: 1)));
       verify(() => mockGoalService.getGoalById(testGoalId)).called(2);
     });
 
@@ -245,10 +246,10 @@ void main() {
       await viewModel.load(); // call #1
 
       // Act
-      await viewModel.goToPreviousDate();
+      await viewModel.dateNavigatorLogic.goToPreviousDate();
 
       // Assert
-      expect(viewModel.selectedDate, today);
+      expect(viewModel.dateNavigatorLogic.selectedDate, today);
       verify(() => mockGoalService.getGoalById(testGoalId)).called(1);
     });
 
@@ -261,7 +262,7 @@ void main() {
       await viewModel.load();
 
       // Act
-      await viewModel.goToPreviousDate();
+      await viewModel.dateNavigatorLogic.goToPreviousDate();
 
       // Assert
       verify(() => mockTaskService.updateTask(any())).called(greaterThan(0));
@@ -277,10 +278,10 @@ void main() {
       await viewModel.load(); // call #1
 
       // Act
-      await viewModel.goToNextDate();
+      await viewModel.dateNavigatorLogic.goToNextDate();
 
       // Assert
-      expect(viewModel.selectedDate, today);
+      expect(viewModel.dateNavigatorLogic.selectedDate, today);
       verify(() => mockGoalService.getGoalById(testGoalId)).called(1);
     });
 
@@ -290,14 +291,14 @@ void main() {
       stubServices(goal: goal, tasks: []);
       final viewModel = DailyTasksViewModel(goalId: testGoalId);
       await viewModel.load();
-      await viewModel.goToPreviousDate();
+      await viewModel.dateNavigatorLogic.goToPreviousDate();
 
       // Act
-      await viewModel.goToNextDate();
+      await viewModel.dateNavigatorLogic.goToNextDate();
 
       // Assert
-      expect(viewModel.selectedDate, today);
-      expect(viewModel.canGoToNextDate, isFalse);
+      expect(viewModel.dateNavigatorLogic.selectedDate, today);
+      expect(viewModel.dateNavigatorLogic.canGoToNextDate, isFalse);
     });
   });
 
@@ -311,10 +312,11 @@ void main() {
       await viewModel.load();
 
       // Act
-      await viewModel.goToDate(tenDaysAgo.subtract(const Duration(days: 5)));
+      await viewModel.dateNavigatorLogic
+          .goToDate(tenDaysAgo.subtract(const Duration(days: 5)));
 
       // Assert
-      expect(viewModel.selectedDate, tenDaysAgo);
+      expect(viewModel.dateNavigatorLogic.selectedDate, tenDaysAgo);
     });
 
     test('clamps to today when the requested date is in the future', () async {
@@ -325,10 +327,11 @@ void main() {
       await viewModel.load();
 
       // Act
-      await viewModel.goToDate(today.add(const Duration(days: 3)));
+      await viewModel.dateNavigatorLogic
+          .goToDate(today.add(const Duration(days: 3)));
 
       // Assert
-      expect(viewModel.selectedDate, today);
+      expect(viewModel.dateNavigatorLogic.selectedDate, today);
     });
 
     test('does not reload when the requested date equals the current one',
@@ -340,7 +343,7 @@ void main() {
       await viewModel.load(); // call #1
 
       // Act
-      await viewModel.goToDate(today);
+      await viewModel.dateNavigatorLogic.goToDate(today);
 
       // Assert
       verify(() => mockGoalService.getGoalById(testGoalId)).called(1);
@@ -356,10 +359,10 @@ void main() {
       final targetDate = today.subtract(const Duration(days: 3));
 
       // Act
-      await viewModel.goToDate(targetDate);
+      await viewModel.dateNavigatorLogic.goToDate(targetDate);
 
       // Assert
-      expect(viewModel.selectedDate, targetDate);
+      expect(viewModel.dateNavigatorLogic.selectedDate, targetDate);
       verify(() => mockGoalService.getGoalById(testGoalId)).called(2);
     });
   });

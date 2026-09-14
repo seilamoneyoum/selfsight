@@ -8,18 +8,19 @@ Widget dateNavigator(BuildContext context, DailyTasksViewModel viewModel) {
     children: [
       IconButton(
         icon: const Icon(Icons.chevron_left),
-        onPressed: viewModel.canGoToPreviousDate
-            ? () => viewModel.goToPreviousDate()
+        onPressed: viewModel.dateNavigatorLogic.canGoToPreviousDate
+            ? () => viewModel.dateNavigatorLogic.goToPreviousDate()
             : null,
       ),
       TextButton(
         onPressed: () => _pickDate(context, viewModel),
-        child: message(_formatDate(viewModel.selectedDate)),
+        child: message(_formatDate(viewModel.dateNavigatorLogic.selectedDate)),
       ),
       IconButton(
         icon: const Icon(Icons.chevron_right),
-        onPressed:
-            viewModel.canGoToNextDate ? () => viewModel.goToNextDate() : null,
+        onPressed: viewModel.dateNavigatorLogic.canGoToNextDate
+            ? () => viewModel.dateNavigatorLogic.goToNextDate()
+            : null,
       ),
     ],
   );
@@ -29,12 +30,12 @@ Future<void> _pickDate(
     BuildContext context, DailyTasksViewModel viewModel) async {
   final picked = await showDatePicker(
     context: context,
-    initialDate: viewModel.selectedDate,
-    firstDate: viewModel.startDateBound ?? DateTime(2000),
-    lastDate: viewModel.todayBound,
+    initialDate: viewModel.dateNavigatorLogic.selectedDate,
+    firstDate: viewModel.dateNavigatorLogic.startDateBound ?? DateTime(2000),
+    lastDate: viewModel.dateNavigatorLogic.todayBound,
   );
   if (picked != null) {
-    viewModel.goToDate(picked);
+    viewModel.dateNavigatorLogic.goToDate(picked);
   }
 }
 

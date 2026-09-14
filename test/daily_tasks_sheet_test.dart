@@ -5,13 +5,11 @@ import 'package:mocktail/mocktail.dart';
 import 'package:selfsight/domain/entities/goal/category.dart';
 import 'package:selfsight/domain/entities/goal/goal.dart';
 import 'package:selfsight/domain/entities/goal/progress.dart';
-import 'package:selfsight/domain/entities/task/frequency.dart';
 import 'package:selfsight/domain/entities/task/task.dart';
 import 'package:selfsight/domain/entities/vision_board/vision_board.dart';
 import 'package:selfsight/presentation/app/app.router.dart';
 import 'package:selfsight/presentation/app/app_setup.dart';
 import 'package:selfsight/presentation/view/daily_tasks/daily_tasks_sheet.dart';
-import 'package:selfsight/presentation/view/goal/task/task_helpers.dart';
 import 'package:selfsight/services/goal_service.dart';
 import 'package:selfsight/services/task_service.dart';
 import 'package:selfsight/services/vision_board_service.dart';
@@ -89,7 +87,7 @@ void main() {
         createAt: today.toIso8601String(),
       );
 
-  Task buildTask({
+  /* Task buildTask({
     required String id,
     required String name,
     int target = 1,
@@ -107,7 +105,7 @@ void main() {
         ),
         progressLog: progressLog ?? {},
       );
-
+*/
   void stubServices({
     required Goal goal,
     required List<Task> tasks,
