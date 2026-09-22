@@ -24,11 +24,18 @@ selfsight est une application Flutter conçue pour vous aider à visualiser vos 
 - **Tests d'intégration** : Simulation des parcours utilisateurs critiques (création d'une vision, ajout de tâches, mise à jour du statut).
 
 ## Aperçu de l'application
-<img width="450" height="897" alt="1" src="https://github.com/user-attachments/assets/657bf4be-a30c-4fc0-911c-b61b4471111f" />
-<img width="452" height="962" alt="2" src="https://github.com/user-attachments/assets/b4dcd4fb-2700-46ac-a70d-41c5fb1ec6aa" />
-<img width="445" height="945" alt="3" src="https://github.com/user-attachments/assets/31fd40b6-f600-49e2-9152-5608288a82cf" />
-<img width="457" height="1011" alt="4" src="https://github.com/user-attachments/assets/b3a6007e-c920-4fb4-a810-60c89c15a3ef" />
-<img width="446" height="1001" alt="5" src="https://github.com/user-attachments/assets/b824c85c-6427-40e1-8884-6bae6f5c68cb" />
+<table>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/657bf4be-a30c-4fc0-911c-b61b4471111f" width="200" /></td>
+    <td><img src="https://github.com/user-attachments/assets/b4dcd4fb-2700-46ac-a70d-41c5fb1ec6aa" width="200" /></td>
+    <td><img src="https://github.com/user-attachments/assets/31fd40b6-f600-49e2-9152-5608288a82cf" width="200" /></td>
+  </tr>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/b3a6007e-c920-4fb4-a810-60c89c15a3ef" width="200" /></td>
+    <td><img src="https://github.com/user-attachments/assets/b824c85c-6427-40e1-8884-6bae6f5c68cb" width="200" /></td>
+    <td></td>
+  </tr>
+</table>
 
 ## 🚀 Pistes d'améliorations futures
 - Synchronisation Cloud (Supabase)
