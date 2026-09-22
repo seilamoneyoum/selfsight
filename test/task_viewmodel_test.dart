@@ -54,7 +54,12 @@ void main() {
       when(() => mockTaskService.updateTask(any())).thenAnswer((_) async {});
       final viewModel = TaskViewModel(goalId: goalId);
       await viewModel.addTask('Ancien nom', frequency);
-      viewModel.startEditingTask(viewModel.tasks.first.id);
+      final addedTask = viewModel.tasks.first;
+      viewModel.startEditingTask(addedTask.id);
+
+      when(() => mockTaskService.getTaskById(addedTask.id)).thenAnswer(
+        (_) async => addedTask,
+      );
 
       // Act
       await viewModel.updateTask('Nouveau nom', frequency);

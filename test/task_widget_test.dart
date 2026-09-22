@@ -366,6 +366,12 @@ void main() {
               time: 15,
               days: [Day.monday]),
         );
+
+        // ⚠️ Assurer d'avoir un stub pour qu'updateTask puisse mettre à jour progressLog
+        final addedTask = viewModel.tasks.first;
+        when(() => mockTaskService.getTaskById(addedTask.id))
+            .thenAnswer((_) async => addedTask);
+
         await tester.pumpWidget(buildTaskWidget(viewModel));
         await tester.pumpAndSettle();
 
